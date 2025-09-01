@@ -51,6 +51,7 @@ body {
 .dashboard-container { display: flex; flex-direction: column; gap: 20px; width: 100%; }
 .dashboard-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
 .card, .summary-card, .finance-card, #pendingBillsCard, #expenseTrackerCard, #next30DaysCard { padding: 16px; border-radius: 16px; text-align: center; display: flex; flex-direction: column; }
+.summary-card, #expenseTrackerCard { justify-content: space-between; }
 .card { border-radius:16px; width:100%; overflow:hidden; padding-bottom:10px; }
 h2, h3 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 600; }
 .card h2 { padding: 0 4px; }
@@ -78,7 +79,7 @@ h2, h3 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 60
 .add-bill-header-btn:hover { background: color-mix(in srgb, var(--accent) 90%, black); }
 .link-button { background: transparent; border: none; color: var(--accent); cursor: pointer; font-size: 14px; padding: 8px; font-weight: 600; }
 .link-button:hover { text-decoration: underline; }
-.summary-card .amount { font-size: 36px; font-weight: 700; line-height: 1.1; margin-top: auto; }
+.summary-card .amount { font-size: 36px; font-weight: 700; line-height: 1.1; }
 .summary-card .projected-balance { font-size: 12px; color: var(--muted); margin-top: 4px; height: 1.2em; font-weight: 600; }
 .summary-card .amount.paid { color: var(--ok); } .summary-card .amount.unpaid { color: var(--danger); } .summary-card .amount.total { color: var(--accent); }
 .finance-card .finance-row { display: grid; grid-template-columns: max-content 1fr; gap: 12px; align-items: center; }
@@ -90,6 +91,7 @@ h2, h3 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 60
 /* Pending & 30-Day Bills */
 #pendingBillsList, #next30DaysList { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; overflow-y: auto; padding-right: 5px; min-height: 80px; }
 #next30DaysList { max-height: 207px; /* Approx 4 items */ }
+#pendingBillsList { max-height: 95px; }
 .upcoming-item { display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.05); padding: 6px 10px; border-radius: 8px; }
 .upcoming-item .name { font-weight: 600; font-size: 14px; }
 .upcoming-item .details { font-size: 13px; text-align: right; }
@@ -386,7 +388,7 @@ tr.paid .unpay-btn {
             </div>
             <div id="expenseTrackerCard" class="glass">
                 <h3>Log an Expense</h3>
-                <div id="expenseQuickOptions" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: auto;">
+                <div id="expenseQuickOptions" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
                     <button class="ctrl-btn quick-expense-btn" data-expense="Food" style="width:100%; height:auto; padding: 12px;">Food 🍔</button>
                     <button class="ctrl-btn quick-expense-btn" data-expense="Gas" style="width:100%; height:auto; padding: 12px;">Gas ⛽</button>
                     <button class="ctrl-btn quick-expense-btn" data-expense="Coffee" style="width:100%; height:auto; padding: 12px;">Coffee ☕</button>
@@ -395,7 +397,7 @@ tr.paid .unpay-btn {
                     <button class="ctrl-btn quick-expense-btn" data-expense="Groceries" style="width:100%; height:auto; padding: 12px;">Groceries 🛒</button>
                     <button class="ctrl-btn" id="customExpenseBtn" style="width:100%; height:auto; padding: 12px; grid-column: 1 / -1;">Custom</button>
                 </div>
-                <form id="expenseForm" style="display: none; margin-top: auto;">
+                <form id="expenseForm" style="display: none;">
                     <input type="text" id="expenseDescription" placeholder="e.g., Lunch" required>
                     <input type="number" id="expenseAmount" placeholder="$ Amount" required>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -926,7 +928,7 @@ tr.paid .unpay-btn {
             return;
         }
         
-        next30.slice(0, 4).forEach(bill => {
+        next30.forEach(bill => {
             const item = document.createElement('div');
             item.className = 'upcoming-item';
             item.innerHTML = `
