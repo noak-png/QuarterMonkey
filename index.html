@@ -51,7 +51,7 @@ body {
 .dashboard-container { display: flex; flex-direction: column; gap: 20px; width: 100%; }
 .dashboard-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
 .card, .summary-card, .finance-card, #pendingBillsCard, #expenseTrackerCard, #next30DaysCard { padding: 16px; border-radius: 16px; text-align: center; display: flex; flex-direction: column; }
-.summary-card, #expenseTrackerCard { justify-content: space-between; }
+.summary-card { justify-content: space-between; }
 .card { border-radius:16px; width:100%; overflow:hidden; padding-bottom:10px; }
 h2, h3 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 600; }
 .card h2 { padding: 0 4px; }
@@ -102,7 +102,7 @@ h2, h3 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 60
 main.card { max-height: calc(100vh - 338px); }
 .bill-table-wrapper { width: 100%; overflow-y: auto; flex-grow: 1; }
 .bill-table-wrapper.scrollable {
-    max-height: 220px; /* Approx height of 3 rows */
+    max-height: 300px; /* Approx height of 4-5 rows */
     overflow-y: auto;
     padding-right: 5px;
 }
