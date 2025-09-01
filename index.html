@@ -9,7 +9,7 @@
 /* ========== Base Theme Variables ========== */
 :root {
   --bg: #f0f2f5; --card: #ffffff; --text: #1a1a1a; --muted: #6b7280;
-  --accent: #059669; --ok: #16a34a; --danger: #ef4444;
+  --accent: #059669; --ok: #16a34a; --danger: #ef4444; --pending: #e0f2fe; --pending-text: #075985; --pending-border: #bae6fd;
   --paid: #d1fae5; --paid-text: #065f46; --border: #dcdfe3;
   --shadow: 0 6px 16px rgba(0,0,0,.08);
   --font-family: system-ui, sans-serif; --font-size: 15px; /* Reduced base font size */
@@ -20,7 +20,7 @@
 }
 .dark {
   --bg:#0b0d10; --card:#0f1418; --text:#e6eef6; --muted:#9aa4b2;
-  --accent:#10b981; --ok:#22c55e; --danger:#f87171;
+  --accent:#10b981; --ok:#22c55e; --danger:#f87171; --pending: #1e293b; --pending-text: #7dd3fc; --pending-border: #384252;
   --paid: #064e3b; --paid-text: #a7f3d0; --border:#1b2430;
   --shadow: 0 14px 36px rgba(0,0,0,.45); --glass-tint: 15,20,24;
   --glass-alpha: 0.65; --glass-stroke: rgba(255,255,255,.08);
@@ -50,7 +50,7 @@ body {
 /* ========== Cards & Grids ========== */
 .dashboard-container { display: flex; flex-direction: column; gap: 20px; width: 100%; }
 .dashboard-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-.card, .summary-card, .finance-card, #upcomingBills, #expenseTrackerCard, #next30DaysCard { padding: 16px; border-radius: 16px; text-align: left; display: flex; flex-direction: column; }
+.card, .summary-card, .finance-card, #pendingBillsCard, #expenseTrackerCard, #next30DaysCard { padding: 16px; border-radius: 16px; text-align: left; display: flex; flex-direction: column; }
 .card { border-radius:16px; width:100%; overflow:hidden; padding-bottom:10px; }
 h2, h3 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 600; }
 .card h2 { padding: 0 4px; }
@@ -69,8 +69,8 @@ h2, h3 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 60
 #expenseTrackerCard form { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
 #expenseTrackerCard button { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
-/* Upcoming & 30-Day Bills */
-#upcomingBillsList, #next30DaysList { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; overflow-y: auto; padding-right: 5px; min-height: 100px; }
+/* Pending & 30-Day Bills */
+#pendingBillsList, #next30DaysList { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; overflow-y: auto; padding-right: 5px; min-height: 80px; }
 .upcoming-item { display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.05); padding: 6px 10px; border-radius: 8px; }
 .upcoming-item .name { font-weight: 600; font-size: 14px; }
 .upcoming-item .details { font-size: 13px; text-align: right; }
@@ -122,14 +122,45 @@ tr.paid .split-info-total, tr.paid .split-info-icon, tr.paid .bill-category-badg
 .date-box { text-align: center; border-radius: 8px; padding: 4px; width: 48px; flex-shrink: 0; border: 1px solid var(--border); }
 .date-box .month { font-size: 10px; font-weight: 600; text-transform: uppercase; display: block; background-color: var(--accent); color: white; border-radius: 5px 5px 0 0; margin: -4px -4px 2px; padding: 2px; }
 tr.paid .date-box .month { background-color: var(--ok); }
+
+tr.pending { background-color: color-mix(in srgb, var(--pending) 8%, transparent); color: var(--pending-text); }
+tr.pending td { box-shadow: inset 0 1px 0 0 var(--pending-border), inset 0 -1px 0 0 var(--pending-border); }
+tr.pending td:first-child { box-shadow: inset 1px 1px 0 0 var(--pending-border), inset 0 -1px 0 0 var(--pending-border); border-radius: 8px 0 0 8px;}
+tr.pending td:last-child { box-shadow: inset -1px 1px 0 0 var(--pending-border), inset 0 -1px 0 0 var(--pending-border); border-radius: 0 8px 8px 0;}
+tr.pending .split-info-total, tr.pending .split-info-icon, tr.pending .bill-category-badge, tr.pending .bill-frequency-badge { color: var(--pending-text); border-color: currentColor; background: transparent; }
+tr.pending .date-box .month { background-color: var(--pending-text); color: var(--pending); }
+
 .date-box .day { font-size: 20px; font-weight: 700; line-height: 1; display: block; }
 .countdown.overdue { color: var(--danger); font-weight: 600; }
 .countdown.paid { color: var(--ok); font-weight: 600; }
+.countdown.pending { color: var(--pending-text); font-weight: 600; }
 .actions-cell { text-align: right; white-space: nowrap; cursor: default; width: 1%; }
 .actions-cell button { background: transparent; border: 1px solid var(--border); padding: 6px 10px; border-radius: 8px; cursor: pointer; margin-left: 8px; }
-.actions-cell .pay-btn { color: var(--ok); } .actions-cell .unpay-btn { display: none; }
-tr.paid .pay-btn { display: none; } tr.paid .unpay-btn { display: inline-block; }
+.actions-cell .pay-btn { color: var(--ok); }
+.actions-cell .pending-btn { color: var(--pending-text); }
 .actions-cell .remove-btn { color: var(--danger); }
+
+/* Default state for buttons inside a row */
+.actions-cell .unpay-btn,
+.actions-cell .pay-btn,
+.actions-cell .pending-btn {
+    display: none;
+}
+
+/* Show buttons based on row status */
+tr.unpaid .pay-btn,
+tr.unpaid .pending-btn {
+    display: inline-block;
+}
+
+tr.pending .pay-btn,
+tr.pending .unpay-btn {
+    display: inline-block;
+}
+
+tr.paid .unpay-btn {
+    display: inline-block;
+}
 .no-bills-message { padding: 40px; text-align: center; color: var(--muted); }
 #pastBillsCard > summary { list-style: none; cursor: pointer; font-weight: 600; padding: 12px 16px; margin: -16px; background: rgba(128,128,128,0.05); }
 #pastBillsCard > summary::-webkit-details-marker { display: none; }
@@ -267,6 +298,38 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         --border: #ccc;
     }
 }
+
+/* Custom styles for pending state */
+tr.pending { background-color: color-mix(in srgb, var(--pending) 8%, transparent); color: var(--pending-text); }
+tr.pending td { box-shadow: inset 0 1px 0 0 var(--pending-border), inset 0 -1px 0 0 var(--pending-border); }
+tr.pending td:first-child { box-shadow: inset 1px 1px 0 0 var(--pending-border), inset 0 -1px 0 0 var(--pending-border); border-radius: 8px 0 0 8px;}
+tr.pending td:last-child { box-shadow: inset -1px 1px 0 0 var(--pending-border), inset 0 -1px 0 0 var(--pending-border); border-radius: 0 8px 8px 0;}
+tr.pending .split-info-total, tr.pending .split-info-icon, tr.pending .bill-category-badge, tr.pending .bill-frequency-badge { color: var(--pending-text); border-color: currentColor; background: transparent; }
+tr.pending .date-box .month { background-color: var(--pending-text); color: var(--pending); }
+.countdown.pending { color: var(--pending-text); font-weight: 600; }
+.actions-cell .pending-btn { color: var(--pending-text); }
+
+/* Default state for buttons inside a row */
+.actions-cell .unpay-btn,
+.actions-cell .pay-btn,
+.actions-cell .pending-btn {
+    display: none;
+}
+
+/* Show buttons based on row status */
+tr.unpaid .pay-btn,
+tr.unpaid .pending-btn {
+    display: inline-block;
+}
+
+tr.pending .pay-btn,
+tr.pending .unpay-btn {
+    display: inline-block;
+}
+
+tr.paid .unpay-btn {
+    display: inline-block;
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf-autotable.umd.min.js"></script>
@@ -288,7 +351,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
             <div class="summary-card glass"><h3 id="totalAmountLabel">Current Balance</h3><div class="amount total" id="totalAmount">$0.00</div></div>
             <div class="summary-card glass"><h3 id="totalDueNext10DaysLabel">Total Due (Next 10 Days)</h3><div class="amount unpaid" id="totalDueNext10Days">$0.00</div><div class="projected-balance" id="projectedBalanceTotal"></div></div>
             <div class="summary-card glass" id="yourShareCard"><h3 id="yourShareNext10DaysLabel">Your Share (Next 10 Days)</h3><div class="amount total" id="yourShareNext10Days">$0.00</div><div class="projected-balance" id="projectedBalanceShare"></div></div>
-            <div id="upcomingBills" class="glass"><h2>Upcoming Bills</h2><div id="upcomingBillsList"></div></div>
+            <div id="pendingBillsCard" class="glass"><h2>Pending</h2><div id="pendingBillsList"></div></div>
         </div>
         <div class="dashboard-row">
             <div id="next30DaysCard" class="glass"><h2>Next 30 Days</h2><div id="next30DaysList"></div></div>
@@ -304,10 +367,22 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
             </div>
             <div id="expenseTrackerCard" class="glass">
                 <h3>Log an Expense</h3>
-                <form id="expenseForm">
+                <div id="expenseQuickOptions" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: auto;">
+                    <button class="ctrl-btn quick-expense-btn" data-expense="Food" style="width:100%; height:auto; padding: 12px;">Food 🍔</button>
+                    <button class="ctrl-btn quick-expense-btn" data-expense="Gas" style="width:100%; height:auto; padding: 12px;">Gas ⛽</button>
+                    <button class="ctrl-btn quick-expense-btn" data-expense="Coffee" style="width:100%; height:auto; padding: 12px;">Coffee ☕</button>
+                    <button class="ctrl-btn quick-expense-btn" data-expense="Cigarettes" style="width:100%; height:auto; padding: 12px;">Cigarettes 🚬</button>
+                    <button class="ctrl-btn quick-expense-btn" data-expense="Baseball Cards" style="width:100%; height:auto; padding: 12px;">Cards 🃏</button>
+                    <button class="ctrl-btn quick-expense-btn" data-expense="Groceries" style="width:100%; height:auto; padding: 12px;">Groceries 🛒</button>
+                    <button class="ctrl-btn" id="customExpenseBtn" style="width:100%; height:auto; padding: 12px; grid-column: 1 / -1;">Custom</button>
+                </div>
+                <form id="expenseForm" style="display: none; margin-top: auto;">
                     <input type="text" id="expenseDescription" placeholder="e.g., Lunch" required>
                     <input type="number" id="expenseAmount" placeholder="$ Amount" required>
-                    <button type="submit">Log Expense</button>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button type="button" id="cancelCustomExpenseBtn">Cancel</button>
+                        <button type="submit">Log Expense</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -413,7 +488,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     const splitBillInputs = $('splitBillInputs');
     const addBtn = $('addBtn'), noBillsMessage = $('noBillsMessage'), noPastBillsMessage = $('noPastBillsMessage'), darkToggle = $('darkToggle'), menuBtn = $('menuBtn'), menuPanel = $('menuPanel'), closeMenuNotch = $('closeMenuNotch');
     const totalAmountEl = $('totalAmount'), totalDueNext10DaysEl = $('totalDueNext10Days'), yourShareNext10DaysEl = $('yourShareNext10Days');
-    const upcomingBillsList = $('upcomingBillsList'), next30DaysList = $('next30DaysList');
+    const pendingBillsList = $('pendingBillsList'), next30DaysList = $('next30DaysList');
     const currentBalance = $('currentBalance'), paycheckAmount = $('paycheckAmount'), nextPayday = $('nextPayday'), payFrequency = $('payFrequency');
     const expenseForm = $('expenseForm');
     const editModal = $('editModal'), closeModalBtn = $('closeModalBtn'), saveEditBtn = $('saveEditBtn');
@@ -481,6 +556,15 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
             }
 
             bills = JSON.parse(localStorage.getItem('quarterMonkey.bills') || '[]');
+            // --- MIGRATION FOR STATUS ---
+            bills.forEach(bill => {
+                if (typeof bill.paid === 'boolean' && !bill.status) {
+                    bill.status = bill.paid ? 'paid' : 'unpaid';
+                    delete bill.paid; // remove old property
+                } else if (!bill.status) {
+                    bill.status = 'unpaid';
+                }
+            });
             const settingsData = localStorage.getItem('quarterMonkey.settings');
             const settings = settingsData ? JSON.parse(settingsData) : {};
             if (settings.darkMode) { document.documentElement.classList.add('dark'); darkToggle.innerHTML = '☀️'; } else { darkToggle.innerHTML = '🌙';}
@@ -499,7 +583,19 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
             wallpaperColor2.value = settings.bgColor2 || '#1e1b4b'; wallpaperColor3.value = settings.bgColor3 || '#4c1d95';
             gradientAngle.value = settings.bgGradientAngle || 145; gradientSpinToggle.checked = settings.bgGradientSpin || false; gradientSpinSpeed.value = settings.bgGradientSpinSpeed || '10';
             enableAmbiance.checked = settings.ambiance || false; ambianceSelect.value = settings.ambianceEffect || 'none';
-            // ... ambiance settings load ...
+            
+            // Ambiance settings
+            const ambiance = settings.ambianceSettings || {};
+            snowDensity.value = ambiance.snowDensity || 100;
+            snowSize.value = ambiance.snowSize || 20;
+            snowSpeed.value = ambiance.snowSpeed || 30;
+            orbsDensity.value = ambiance.orbsDensity || 40;
+            orbsSize.value = ambiance.orbsSize || 70;
+            orbsSpeed.value = ambiance.orbsSpeed || 20;
+            orbsColor.value = ambiance.orbsColor || '#9aa4b2';
+            starfieldDensity.value = settings.starfieldDensity || 500;
+            starfieldSpeed.value = settings.starfieldSpeed || 25;
+
         } catch (error) { console.error("Failed to load data:", error); }
         $('billDate').value = new Date().toISOString().split('T')[0];
         applyAllAppearance(); syncExperimentalFeatures(); renderApp(true);
@@ -509,17 +605,17 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     function renderApp(isInitialLoad = false) {
         if (currentView === 'list') { billTrackerCard.style.display = 'flex'; pastBillsCard.style.display = 'block'; calendarView.style.display = 'none'; calendarToggleBtn.classList.remove('active'); renderLists(isInitialLoad); } 
         else { billTrackerCard.style.display = 'none'; pastBillsCard.style.display = 'none'; calendarView.style.display = 'block'; calendarToggleBtn.classList.add('active'); renderCalendar(); }
-        updateSummary(); renderUpcomingBills(); renderNext30Days();
+        updateSummary(); renderPendingBills(); renderNext30Days();
     }
     function renderLists(isInitialLoad = false) {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         thirtyDaysAgo.setHours(0, 0, 0, 0);
 
-        const activeBills = bills.filter(b => !b.paid).sort((a, b) => new Date(a.date) - new Date(b.date));
+        const activeBills = bills.filter(b => b.status !== 'paid').sort((a, b) => new Date(a.date) - new Date(b.date));
         const pastBills = bills.filter(b => {
             const billDate = new Date(b.date + 'T00:00:00');
-            return b.paid && billDate >= thirtyDaysAgo;
+            return b.status === 'paid' && billDate >= thirtyDaysAgo;
         }).sort((a, b) => new Date(b.date) - new Date(a.date));
         
         billListBody.innerHTML = ''; noBillsMessage.style.display = activeBills.length === 0 ? 'block' : 'none';
@@ -538,7 +634,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     }
     function renderArchive() {
         archiveBillsListBody.innerHTML = '';
-        const allPastBills = bills.filter(b => b.paid).sort((a, b) => new Date(b.date) - new Date(a.date));
+        const allPastBills = bills.filter(b => b.status === 'paid').sort((a, b) => new Date(b.date) - new Date(a.date));
 
         noArchivedBillsMessage.style.display = allPastBills.length === 0 ? 'block' : 'none';
 
@@ -553,16 +649,43 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         }
     }
     function createBillRow(bill, isInitialLoad = false) {
-        const tr = document.createElement('tr'); tr.dataset.id = bill.id;
-        if (bill.paid) tr.classList.add('paid');
+        const tr = document.createElement('tr');
+        tr.dataset.id = bill.id;
+        if (bill.status === 'paid') tr.classList.add('paid');
+        else if (bill.status === 'pending') tr.classList.add('pending');
+        else tr.classList.add('unpaid');
+
         const { month, day } = formatDate(bill.date);
         let nameHtml = `<span class="bill-name">${bill.name}</span>`;
         if(bill.isSplit && enableSplitBillMode.checked) { nameHtml += `<span class="split-info-icon" title="Split with ${bill.splitWithName}">⚁</span>`; }
+        
         let countdownHtml;
-        if (bill.paid) { countdownHtml = `<span class="countdown paid">Paid</span>`; } 
-        else { const countdownText = getCountdown(bill.date); const isOverdueClass = countdownText.includes('overdue') ? 'overdue' : ''; countdownHtml = `<span class="countdown ${isOverdueClass}">${countdownText}</span>`; }
-        tr.innerHTML = `<td><div class="due-date-cell"><div class="date-box"><span class="month">${month}</span><span class="day">${day}</span></div><div class="date-info">${countdownHtml}</div></div></td><td class="bill-details-cell">${nameHtml}<div class="bill-sub-details"><span class="bill-category-badge">${bill.category}</span><span class="bill-frequency-badge">${bill.frequency}</span></div></td><td><div class="bill-notes">${bill.notes || '-'}</div></td><td class="bill-amount-cell"><span class="bill-amount">${formatCurrency(getUserShare(bill))}</span>${(bill.isSplit && enableSplitBillMode.checked) ? `<span class="split-info-total">Total: ${formatCurrency(bill.amount)}</span>` : ''}</td><td class="actions-cell"><button class="pay-btn">Paid ✔</button><button class="unpay-btn">Unpaid ↩</button><button class="remove-btn">✖</button></td>`;
-        if (!isInitialLoad && bill.justAdded) { animateEnter(tr); delete bill.justAdded; }
+        if (bill.status === 'paid') {
+            countdownHtml = `<span class="countdown paid">Paid</span>`;
+        } else if (bill.status === 'pending') {
+            countdownHtml = `<span class="countdown pending">Pending</span>`;
+        } else {
+            const countdownText = getCountdown(bill.date);
+            const isOverdueClass = countdownText.includes('overdue') ? 'overdue' : '';
+            countdownHtml = `<span class="countdown ${isOverdueClass}">${countdownText}</span>`;
+        }
+
+        tr.innerHTML = `
+            <td><div class="due-date-cell"><div class="date-box"><span class="month">${month}</span><span class="day">${day}</span></div><div class="date-info">${countdownHtml}</div></div></td>
+            <td class="bill-details-cell">${nameHtml}<div class="bill-sub-details"><span class="bill-category-badge">${bill.category}</span><span class="bill-frequency-badge">${bill.frequency}</span></div></td>
+            <td><div class="bill-notes">${bill.notes || '-'}</div></td>
+            <td class="bill-amount-cell"><span class="bill-amount">${formatCurrency(getUserShare(bill))}</span>${(bill.isSplit && enableSplitBillMode.checked) ? `<span class="split-info-total">Total: ${formatCurrency(bill.amount)}</span>` : ''}</td>
+            <td class="actions-cell">
+                <button class="pay-btn">Paid ✔</button>
+                <button class="pending-btn">Pending</button>
+                <button class="unpay-btn">Unpaid ↩</button>
+                <button class="remove-btn">✖</button>
+            </td>`;
+        
+        if (!isInitialLoad && bill.justAdded) {
+            animateEnter(tr);
+            delete bill.justAdded;
+        }
         return tr;
     }
     function getPaydaysForMonth(year, month) {
@@ -710,7 +833,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
             let dayHeaderHTML = `<div class="day-number">${day}</div>`;
             let dayExtrasHTML = '';
             
-            const dailyTotal = billsOnDay.reduce((sum, bill) => sum + (bill.paid ? 0 : getUserShare(bill)), 0);
+            const dailyTotal = billsOnDay.reduce((sum, bill) => sum + (bill.status === 'paid' ? 0 : getUserShare(bill)), 0);
             if (dailyTotal > 0) {
                 dayExtrasHTML += `<div class="day-balance negative">${formatCurrency(dailyTotal)}</div>`;
             }
@@ -722,7 +845,8 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
             if (billsOnDay.length > 0) {
                 billsHTML = billsOnDay.map(bill => {
                     let classes = 'bill-item-calendar';
-                    if (bill.paid) classes += ' paid';
+                    if (bill.status === 'paid') classes += ' paid';
+                    else if (bill.status === 'pending') classes += ' pending';
                     if (bill.category === 'Expense') classes += ' expense';
                     return `<div class="${classes}" title="${bill.name} - ${formatCurrency(getUserShare(bill))}">${bill.name}</div>`;
                 }).join('');
@@ -733,20 +857,19 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         }
         calendarView.appendChild(grid);
     }
-    function renderUpcomingBills() {
-        upcomingBillsList.innerHTML = '';
-        const upcoming = bills.filter(b => !b.paid && new Date(b.date + 'T23:59:59') >= new Date())
-                               .sort((a, b) => new Date(a.date) - new Date(b.date))
-                               .slice(0, 4);
+    function renderPendingBills() {
+        pendingBillsList.innerHTML = '';
+        const pending = bills.filter(b => b.status === 'pending')
+                               .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        if (upcoming.length === 0) {
-            upcomingBillsList.innerHTML = '<p style="font-size:12px; color: var(--muted); text-align:center; margin-top:10px;">No bills due soon.</p>';
+        if (pending.length === 0) {
+            pendingBillsList.innerHTML = '<p style="font-size:12px; color: var(--muted); text-align:center; margin-top:10px;">No pending bills.</p>';
             return;
         }
 
-        upcoming.forEach(bill => {
+        pending.forEach(bill => {
             const item = document.createElement('div');
-            item.className = 'upcoming-item';
+            item.className = 'upcoming-item'; // Keep class for styling consistency
             item.innerHTML = `
                 <div class="name">${bill.name}</div>
                 <div class="details">
@@ -754,7 +877,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
                     <div class="countdown">${getCountdown(bill.date)}</div>
                 </div>
             `;
-            upcomingBillsList.appendChild(item);
+            pendingBillsList.appendChild(item);
         });
     }
     function renderNext30Days() {
@@ -766,7 +889,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
 
         const next30 = bills.filter(b => {
             const billDate = new Date(b.date + 'T00:00:00');
-            return !b.paid && billDate >= today && billDate <= thirtyDaysFromNow;
+            return b.status !== 'paid' && billDate >= today && billDate <= thirtyDaysFromNow;
         }).sort((a, b) => new Date(a.date) - new Date(b.date));
 
         if (next30.length === 0) {
@@ -789,7 +912,17 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     }
     function updateSummary() {
         const balance = parseFloat(currentBalance.value) || 0;
-        totalAmountEl.textContent = formatCurrency(balance);
+        const pendingTotal = bills.filter(b => b.status === 'pending').reduce((sum, bill) => sum + getUserShare(bill), 0);
+        const balanceAfterPending = balance - pendingTotal;
+
+        totalAmountEl.textContent = formatCurrency(balanceAfterPending);
+        if (pendingTotal > 0) {
+            const originalBalanceEl = document.createElement('div');
+            originalBalanceEl.className = 'projected-balance';
+            originalBalanceEl.textContent = `Current: ${formatCurrency(balance)}`;
+            totalAmountEl.parentNode.appendChild(originalBalanceEl);
+        }
+
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -798,7 +931,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
 
         const dueInNext10Days = bills.filter(b => {
             const billDate = new Date(b.date + 'T00:00:00');
-            return !b.paid && billDate >= today && billDate <= tenDaysFromNow;
+            return b.status === 'unpaid' && billDate >= today && billDate <= tenDaysFromNow;
         });
 
         const totalDue = dueInNext10Days.reduce((sum, bill) => sum + bill.amount, 0);
@@ -817,8 +950,9 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
                 const paydaysInRange = getPaydaysInRange(today, tenDaysFromNow);
                 const upcomingIncome = paydaysInRange.length * paycheck;
 
-                const projectedBalanceTotal = balance - totalDue + upcomingIncome;
-                const projectedBalanceShare = balance - yourShare + upcomingIncome;
+                // Projected balance should be based on the balance *after* pending bills are considered
+                const projectedBalanceTotal = balanceAfterPending - totalDue + upcomingIncome;
+                const projectedBalanceShare = balanceAfterPending - yourShare + upcomingIncome;
                 
                 projectedTotalEl.textContent = `Balance after: ${formatCurrency(projectedBalanceTotal)}`;
                 projectedShareEl.textContent = `Balance after: ${formatCurrency(projectedBalanceShare)}`;
@@ -1126,7 +1260,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     const handleAddBill = () => {
         const name = $('billName').value.trim(); if (!name) { alert('Please enter at least a bill name.'); return; }
         const amount = parseFloat($('billAmount').value) || 0; const date = $('billDate').value || new Date().toISOString().split('T')[0];
-        const newBill = { id: Date.now(), name, amount, date, category: $('billCategory').value, frequency: $('billFrequency').value, notes: $('billNotes').value.trim(), paid: false, isSplit: false, justAdded: true };
+        const newBill = { id: Date.now(), name, amount, date, category: $('billCategory').value, frequency: $('billFrequency').value, notes: $('billNotes').value.trim(), status: 'unpaid', isSplit: false, justAdded: true };
         if (enableSplitBillMode.checked && $('billSplitName').value.trim() && parseFloat($('billSplitAmount').value) > 0) {
             newBill.isSplit = true; newBill.splitWithName = $('billSplitName').value.trim(); newBill.splitWithAmount = parseFloat($('billSplitAmount').value);
             if (newBill.splitWithAmount >= amount && amount > 0) { alert("The other person's share cannot be >= the total amount."); return; }
@@ -1134,16 +1268,14 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         bills.push(newBill); addBillForm.reset(); $('billDate').value = new Date().toISOString().split('T')[0];
         saveData(); renderApp();
     };
-    const handleAddExpense = (e) => {
-        e.preventDefault();
-        const desc = $('expenseDescription').value.trim(),
-            amount = parseFloat($('expenseAmount').value);
+    
+    const handleAddExpense = (desc, amount) => {
         if (desc && amount > 0) {
             const newExpenseAsBill = {
                 id: Date.now(), name: desc, amount: amount,
                 date: new Date().toISOString().split('T')[0], category: 'Expense',
                 frequency: 'One-Time', notes: 'Logged as a one-time expense.',
-                paid: true, isSplit: false, justAdded: true
+                status: 'paid', isSplit: false, justAdded: true
             };
             bills.push(newExpenseAsBill);
             if (!dontAutoDeduct.checked) {
@@ -1153,30 +1285,62 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
             saveData();
             renderApp();
             expenseForm.reset();
+            toggleExpenseView(false); // Go back to quick options
         }
+    };
+
+    const handleCustomExpenseSubmit = (e) => {
+        e.preventDefault();
+        const desc = $('expenseDescription').value.trim();
+        const amount = parseFloat($('expenseAmount').value);
+        handleAddExpense(desc, amount);
+    };
+
+    const handleQuickExpense = (e) => {
+        const expenseType = e.target.dataset.expense;
+        const amount = parseFloat(prompt(`Enter amount for ${expenseType}:`));
+        if (amount) {
+            handleAddExpense(expenseType, amount);
+        }
+    };
+    
+    const toggleExpenseView = (showCustom) => {
+        $('expenseQuickOptions').style.display = showCustom ? 'none' : 'grid';
+        $('expenseForm').style.display = showCustom ? 'flex' : 'none';
     };
     const handleListClick = (e) => {
         const tr = e.target.closest('tr'); if (!tr) return;
         const target = e.target;
-        if (target.matches('.pay-btn, .unpay-btn, .remove-btn')) {
+        if (target.matches('.pay-btn, .unpay-btn, .pending-btn, .remove-btn')) {
             const billId = Number(tr.dataset.id);
             const bill = bills.find(b => b.id === billId);
-            if (target.matches('.pay-btn, .unpay-btn')) {
-                const wasPaid = bill.paid;
-                bill.paid = !bill.paid;
-                if (!dontAutoDeduct.checked) {
+            if (!bill) return;
+
+            if (target.matches('.pending-btn')) {
+                bill.status = 'pending';
+                saveData();
+                renderApp(true);
+            } else if (target.matches('.pay-btn')) {
+                const oldStatus = bill.status;
+                bill.status = 'paid';
+                if (!dontAutoDeduct.checked && oldStatus !== 'paid') {
                     const share = getUserShare(bill);
                     const currentBalanceVal = parseFloat(currentBalance.value) || 0;
-                    if (bill.paid && !wasPaid) {
-                        currentBalance.value = (currentBalanceVal - share).toFixed(2);
-                    } else if (!bill.paid && wasPaid) {
-                        currentBalance.value = (currentBalanceVal + share).toFixed(2);
-                    }
+                    currentBalance.value = (currentBalanceVal - share).toFixed(2);
                 }
                 saveData();
                 renderApp(true);
-            }
-            if (target.matches('.remove-btn')) {
+            } else if (target.matches('.unpay-btn')) {
+                const oldStatus = bill.status;
+                bill.status = 'unpaid';
+                if (!dontAutoDeduct.checked && oldStatus === 'paid') {
+                    const share = getUserShare(bill);
+                    const currentBalanceVal = parseFloat(currentBalance.value) || 0;
+                    currentBalance.value = (currentBalanceVal + share).toFixed(2);
+                }
+                saveData();
+                renderApp(true);
+            } else if (target.matches('.remove-btn')) {
                 if (confirm(`Delete bill: "${bill.name}"?`)) {
                     animateRemove(tr, () => {
                         bills = bills.filter(b => b.id !== billId);
@@ -1297,9 +1461,12 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         appView.style.display = 'grid';
     });
     addBtn.addEventListener('click', handleAddBill);
-    expenseForm.addEventListener('submit', handleAddExpense);
+    expenseForm.addEventListener('submit', handleCustomExpenseSubmit);
     billListBody.addEventListener('click', handleListClick);
     pastBillsListBody.addEventListener('click', handleListClick);
+    $('customExpenseBtn').addEventListener('click', () => toggleExpenseView(true));
+    $('cancelCustomExpenseBtn').addEventListener('click', () => toggleExpenseView(false));
+    document.querySelectorAll('.quick-expense-btn').forEach(btn => btn.addEventListener('click', handleQuickExpense));
     billListBody.addEventListener('dblclick', handleListDoubleClick);
     pastBillsListBody.addEventListener('dblclick', handleListDoubleClick);
     saveEditBtn.addEventListener('click', handleSaveEdit);
