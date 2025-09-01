@@ -100,7 +100,18 @@ table.bill-table tbody tr { cursor: pointer; border-bottom: 1px dashed var(--bor
 .bill-sub-details { display: flex; gap: 8px; margin-top: 4px; }
 .bill-category-badge, .bill-frequency-badge { font-size: 10px; padding: 2px 8px; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-weight: 500;}
 .split-info-icon { font-size: 11px; margin-left: 6px; color: var(--muted); border: 1px solid; padding: 1px 4px; border-radius: 6px; }
-.bill-notes { font-size: 13px; color: var(--muted); max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bill-notes {
+    font-size: 13px;
+    color: var(--muted);
+    white-space: pre-wrap; /* Allow wrapping */
+    word-break: break-word; /* Break long words */
+    max-height: 60px; /* Limit height to about 3-4 lines */
+    overflow-y: auto; /* Add scroll for longer notes */
+    padding: 4px 8px;
+    background-color: rgba(128,128,128,0.05);
+    border-radius: 6px;
+    line-height: 1.4;
+}
 .bill-amount-cell .bill-amount { font-weight: 700; }
 .bill-amount-cell .split-info-total { font-size: 11px; color: var(--muted); display: block; }
 tr.paid { background-color: color-mix(in srgb, var(--ok) 8%, transparent); color: var(--paid-text); }
@@ -157,6 +168,25 @@ tr.paid .pay-btn { display: none; } tr.paid .unpay-btn { display: inline-block; 
 .modal-buttons button { padding: 10px 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
 .modal-buttons .save-btn { background: var(--accent); color: white; }
 .modal-buttons .cancel-btn { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+
+#dayBreakdownContent ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+#dayBreakdownContent li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+}
+#dayBreakdownContent li:last-child {
+    border-bottom: none;
+}
+#dayBreakdownContent h3 {
+    margin-top: 16px;
+    margin-bottom: 8px;
+}
 
 /* ========== Natural Slide Animations ========== */
 tr.slide-enter { opacity:0; transform:translateY(10px); }
@@ -346,6 +376,16 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
   <div class="clock-display glass" id="clockDisplay" style="display:none;"></div>
 
   <div id="editModal" class="modal-overlay"><div class="modal-content glass"><h2>Edit Bill</h2><div class="modal-form"><label for="editBillName">Bill Name</label><input type="text" id="editBillName" class="full-width"><label for="editBillAmount">Total Amount</label><input type="number" step="0.01" id="editBillAmount" class="full-width"><label for="editBillDate">Due Date</label><input type="date" id="editBillDate" class="full-width"><label for="editBillCategory">Category</label><select id="editBillCategory" class="full-width"></select><label for="editBillFrequency">Frequency</label><select id="editBillFrequency" class="full-width"></select><label for="editBillNotes">Notes</label><textarea id="editBillNotes" class="full-width"></textarea><div id="editSplitBillInputs" class="full-width" style="display: none;"><hr><label>Split Info</label><input type="text" id="editBillSplitName" placeholder="Split with (Name)"><input type="number" id="editBillSplitAmount" placeholder="Their Share ($)"></div><div class="modal-buttons"><button type="button" class="cancel-btn" id="closeModalBtn">Cancel</button><button type="button" class="save-btn" id="saveEditBtn">Save Changes</button></div></div></div></div>
+  
+  <div id="dayBreakdownModal" class="modal-overlay">
+    <div class="modal-content glass">
+      <h2 id="dayBreakdownTitle">Day Breakdown</h2>
+      <div id="dayBreakdownContent"></div>
+      <div class="modal-buttons">
+        <button type="button" class="cancel-btn" id="closeDayBreakdownModalBtn">Close</button>
+      </div>
+    </div>
+  </div>
 
   <div class="menu-panel glass" id="menuPanel" aria-hidden="true">
     <div class="section"><details><summary>Appearance</summary>
@@ -354,7 +394,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
           <div class="sub-section"><details><summary>Animations</summary><div class="content"><label><input type="checkbox" id="enableNaturalSlide"> Natural Slide Animation</label><div class="slider-row"><label for="slideSpeed">Speed</label><input type="range" id="slideSpeed" min="200" max="1400" value="800" /><span class="pct" id="slideSpeedPct"></span></div></div></details></div>
           <div class="sub-section"><details><summary>Background</summary><div class="content"><div class="stack"><label><input type="checkbox" id="enableCustomBackground">Enable Custom Background</label></div><div id="customBackgroundOptions" class="stack" style="display:none;"><div class="hr"></div><div class="stack"><label for="backgroundType">Type</label><select id="backgroundType"><option value="theme" selected>Theme</option><option value="image">Image</option><option value="color">Gradient</option></select></div><div id="imageWallpaperControls" style="display:none; margin-top: 10px;"><input type="file" id="wallpaperFile" accept="image/*" /></div><div id="colorWallpaperControls" class="stack" style="display:none; margin-top: 10px;"><label>Start Color: <input type="color" id="wallpaperColor3" value="#1e1b4b"></label><label>End Color: <input type="color" id="wallpaperColor2" value="#4c1d95"></label><div class="slider-row"><label for="gradientAngle">Angle</label><input type="range" id="gradientAngle" min="0" max="360" value="145"><span class="pct" id="gradientAnglePct"></span></div><div class="stack"><label><input type="checkbox" id="gradientSpinToggle">Enable Spinning</label><div class="slider-row" id="gradientSpinControls" style="display:none;"><label for="gradientSpinSpeed">Speed</label><input type="range" id="gradientSpinSpeed" min="1" max="100" value="10"><span class="pct" id="gradientSpinSpeedPct"></span></div></div></div></div><div class="hr"></div><div class="stack"><label><input type="checkbox" id="enableAmbiance">Enable Live Effects</label><div id="ambianceSettings" class="stack" style="display:none; margin-top: 10px;"><select id="ambianceSelect"><option value="none" selected>None</option><option value="snowflakes">Snowflakes</option><option value="orbs">Orbs</option><option value="starfield">Starfield</option></select><div id="ambianceControls" class="stack" style="display:none; border:1px solid var(--border); border-radius:8px; padding:10px; gap: 10px;"><div id="snowControls" class="stack" style="display:none;"><div class="slider-row"><label>Density</label><input type="range" id="snowDensity" min="0" max="300" value="100"><span class="pct" id="snowDensityPct"></span></div><div class="slider-row"><label>Size</label><input type="range" id="snowSize" min="10" max="40" value="20"><span class="pct" id="snowSizePct"></span></div><div class="slider-row"><label>Speed</label><input type="range" id="snowSpeed" min="10" max="100" value="30"><span class="pct" id="snowSpeedPct"></span></div></div><div id="orbsControls" class="stack" style="display:none;"><div class="slider-row"><label>Density</label><input type="range" id="orbsDensity" min="10" max="150" value="40"><span class="pct" id="orbsDensityPct"></span></div><div class="slider-row"><label>Size</label><input type="range" id="orbsSize" min="20" max="150" value="70"><span class="pct" id="orbsSizePct"></span></div><div class="slider-row"><label>Speed</label><input type="range" id="orbsSpeed" min="5" max="100" value="20"><span class="pct" id="orbsSpeedPct"></span></div><label>Color: <input type="color" id="orbsColor" value="#9aa4b2"></label></div><div id="starfieldControls" class="stack" style="display:none;"><div class="slider-row"><label>Density</label><input type="range" id="starfieldDensity" min="50" max="1500" value="500"><span class="pct" id="starfieldDensityPct"></span></div><div class="slider-row"><label>Speed</label><input type="range" id="starfieldSpeed" min="1" max="100" value="25"><span class="pct" id="starfieldSpeedPct"></span></div></div></div></div></div></div></details></div>
     </div></details></div>
-    <div class="section"><details><summary>Utility</summary><div class="content"><div class="stack"><label><input type="checkbox" id="enableClock"> Enable Clock</label><div id="clockOptionsWrapper" class="stack" style="display:none;"><label for="clockPosition">Position</label><select id="clockPosition"><option value="pos-top-left">Top Left</option><option value="pos-top-center">Top Center</option><option value="pos-top-right" selected>Top Right</option><option value="pos-bottom-left">Bottom Left</option><option value="pos-bottom-center">Bottom Center</option><option value="pos-bottom-right">Bottom Right</option></select><label for="clockDetail">Detail Level</label><select id="clockDetail"><option value="time">Time</option><option value="timeSec">Time w/ Seconds</option><option value="dateTime" selected>Date & Time</option></select></div></div><div class="hr"></div><div class="sub-section"><details><summary>Export Data</summary><div class="content"><div class="stack"><p style="font-size:12px;color:var(--muted);margin:4px 0 0;">Export your bills and financial data. Select a date range or leave blank to export all data.</p><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><label>From: <input type="date" id="exportDateFrom" style="width:100%"></label><label>To: <input type="date" id="exportDateTo" style="width:100%"></label></div><div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px;"><button id="exportCsvBtn" class="ctrl-btn" style="width:100%; height:auto; padding: 10px;">Export CSV</button><button id="exportPdfBtn" class="ctrl-btn" style="width:100%; height:auto; padding: 10px;">Export PDF</button><button id="exportProfileBtn" class="ctrl-btn" style="width:100%; height:auto; padding: 10px;">Export Profile</button></div></div></div></details></div><div class="hr"></div><div class="sub-section"><details><summary>Experimental</summary><div class="content"><label><input type="checkbox" id="enableSplitBillMode"> Enable Split Bill Mode</label><p style="font-size:12px;color:var(--muted);margin:4px 0 0;">Adds options to split a bill with another person.</p></div></details></div></div></details></div>
+    <div class="section"><details><summary>Utility</summary><div class="content"><div class="stack"><label><input type="checkbox" id="enableClock"> Enable Clock</label><div id="clockOptionsWrapper" class="stack" style="display:none;"><label for="clockPosition">Position</label><select id="clockPosition"><option value="pos-top-left">Top Left</option><option value="pos-top-center">Top Center</option><option value="pos-top-right" selected>Top Right</option><option value="pos-bottom-left">Bottom Left</option><option value="pos-bottom-center">Bottom Center</option><option value="pos-bottom-right">Bottom Right</option></select><label for="clockDetail">Detail Level</label><select id="clockDetail"><option value="time">Time</option><option value="timeSec">Time w/ Seconds</option><option value="dateTime" selected>Date & Time</option></select></div></div><div class="hr"></div><div class="sub-section"><details open><summary>Data Management</summary><div class="content"><div class="stack"><p style="font-size:12px;color:var(--muted);margin:4px 0 0;">Import or export your full application profile. This includes all bills, settings, and appearance customizations.</p><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;"><button id="importProfileBtn" class="ctrl-btn" style="width:100%; height:auto; padding: 10px;">Import Profile</button><button id="exportProfileBtn" class="ctrl-btn" style="width:100%; height:auto; padding: 10px;">Export Profile</button></div></div></div></details></div><div class="hr"></div><div class="sub-section"><details><summary>Experimental</summary><div class="content"><label><input type="checkbox" id="enableSplitBillMode"> Enable Split Bill Mode</label><p style="font-size:12px;color:var(--muted);margin:4px 0 0;">Adds options to split a bill with another person.</p></div></details></div></div></details></div>
     <div class="menu-notch"><button id="closeMenuNotch">Close</button></div>
   </div>
 
@@ -588,6 +628,41 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         }
         return paydays;
     }
+
+    function getBillsForDate(targetDate) {
+        const targetYear = targetDate.getFullYear();
+        const targetMonth = targetDate.getMonth();
+        const targetDay = targetDate.getDate();
+
+        return bills.filter(bill => {
+            const billDate = new Date(bill.date + 'T00:00:00');
+            const billYear = billDate.getFullYear();
+            const billMonth = billDate.getMonth();
+            const billDay = billDate.getDate();
+
+            if (billDate > targetDate) {
+                return false; // Bill starts in the future
+            }
+
+            switch (bill.frequency) {
+                case 'One-Time':
+                    return targetYear === billYear && targetMonth === billMonth && targetDay === billDay;
+                case 'Monthly':
+                    return billDay === targetDay;
+                case 'Quarterly':
+                    {
+                        if (billDay !== targetDay) return false;
+                        const monthDiff = (targetYear - billYear) * 12 + (targetMonth - billMonth);
+                        return monthDiff >= 0 && monthDiff % 3 === 0;
+                    }
+                case 'Annually':
+                    return billMonth === targetMonth && billDay === targetDay;
+                default:
+                    return false;
+            }
+        });
+    }
+
     function renderCalendar() {
         calendarView.innerHTML = '';
         const year = calendarDate.getFullYear();
@@ -629,10 +704,8 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
                 dayCell.classList.add('today');
             }
 
-            const billsOnDay = bills.filter(b => {
-                const billDate = new Date(b.date + 'T00:00:00');
-                return billDate.getFullYear() === year && billDate.getMonth() === month && billDate.getDate() === day;
-            });
+            const currentDate = new Date(year, month, day);
+            const billsOnDay = getBillsForDate(currentDate);
 
             let dayHeaderHTML = `<div class="day-number">${day}</div>`;
             let dayExtrasHTML = '';
@@ -850,6 +923,44 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         saveData();
         renderApp(true);
         closeEditModal();
+    }
+    
+    function showDayBreakdown(date) {
+        const dayBreakdownModal = $('dayBreakdownModal');
+        const dayBreakdownTitle = $('dayBreakdownTitle');
+        const dayBreakdownContent = $('dayBreakdownContent');
+
+        dayBreakdownTitle.textContent = `Breakdown for ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+        
+        const billsOnDay = getBillsForDate(date);
+        const paydaysOnDay = getPaydaysForMonth(date.getFullYear(), date.getMonth()).includes(date.getDate());
+
+        let contentHTML = '<h3>Bills Due</h3>';
+        if (billsOnDay.length > 0) {
+            contentHTML += '<ul>';
+            billsOnDay.forEach(bill => {
+                contentHTML += `<li>${bill.name} - ${formatCurrency(getUserShare(bill))}</li>`;
+            });
+            contentHTML += '</ul>';
+        } else {
+            contentHTML += '<p>No bills due on this day.</p>';
+        }
+
+        contentHTML += '<h3>Income</h3>';
+        if (paydaysOnDay && paycheckAmount.value > 0) {
+            contentHTML += '<ul>';
+            contentHTML += `<li>Paycheck - ${formatCurrency(parseFloat(paycheckAmount.value))}</li>`;
+            contentHTML += '</ul>';
+        } else {
+            contentHTML += '<p>No income on this day.</p>';
+        }
+
+        dayBreakdownContent.innerHTML = contentHTML;
+        dayBreakdownModal.classList.add('visible');
+    }
+
+    function closeDayBreakdownModal() {
+        $('dayBreakdownModal').classList.remove('visible');
     }
 
     // --- APPEARANCE & ANIMATIONS ---
@@ -1082,6 +1193,14 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     const handleToggleDarkMode = () => { document.documentElement.classList.toggle('dark'); const isDark = document.documentElement.classList.contains('dark'); darkToggle.innerHTML = isDark ? '☀️' : '🌙'; applyMaterialStyle(); saveData(); };
     const handleWallpaperFile = (e) => { const file = e.target.files[0]; if (file && file.size < 5*1024*1024) { const reader = new FileReader(); reader.onload = (e) => { localStorage.setItem('quarterMonkey.wallpaper', e.target.result); updateWallpaper(); saveData(); }; reader.readAsDataURL(file); } else if (file) alert('Image too large (max 5MB).'); };
     const handleCalendarNav = (e) => {
+        const dayCell = e.target.closest('.calendar-day');
+        if (dayCell && !dayCell.classList.contains('other-month')) {
+            const day = dayCell.querySelector('.day-number').textContent;
+            const date = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), day);
+            showDayBreakdown(date);
+            return;
+        }
+
         let reRender = false;
         if (e.target.closest('#prevMonthBtn')) {
             calendarDate.setMonth(calendarDate.getMonth() - 1);
@@ -1097,104 +1216,16 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         }
     };
 
-    function getFilteredBills() {
-        const fromDate = $('exportDateFrom').value;
-        const toDate = $('exportDateTo').value;
-        let filteredBills = [...bills]; // Create a copy to avoid modifying the original array
-        if (fromDate) {
-            filteredBills = filteredBills.filter(b => b.date >= fromDate);
-        }
-        if (toDate) {
-            filteredBills = filteredBills.filter(b => b.date <= toDate);
-        }
-        return filteredBills.sort((a, b) => new Date(a.date) - new Date(b.date));
-    }
-
-    function handleExportCSV() {
-        const filteredBills = getFilteredBills();
-        if (filteredBills.length === 0) {
-            alert("No bills to export in the selected date range.");
-            return;
-        }
-        const headers = ['ID', 'Name', 'Total Amount', 'Your Share', 'Date', 'Frequency', 'Category', 'Notes', 'Paid', 'Is Split', 'Split With Name', 'Their Share'];
-        const csvRows = [headers.join(',')];
-        for (const bill of filteredBills) {
-            const values = [
-                bill.id,
-                `"${bill.name.replace(/"/g, '""')}"`,
-                bill.amount,
-                getUserShare(bill),
-                bill.date,
-                bill.frequency,
-                bill.category,
-                `"${(bill.notes || '').replace(/"/g, '""')}"`,
-                bill.paid,
-                bill.isSplit || false,
-                `"${(bill.splitWithName || '').replace(/"/g, '""')}"`,
-                bill.splitWithAmount || 0
-            ];
-            csvRows.push(values.join(','));
-        }
-        const csvContent = csvRows.join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", "QuarterMonkey_Export.csv");
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    function handleExportPDF() {
-        const filteredBills = getFilteredBills();
-        if (filteredBills.length === 0) {
-            alert("No bills to export in the selected date range.");
-            return;
-        }
-        // Corrected instantiation below
-        const doc = new window.jspdf.jsPDF();
-
-        doc.text("QuarterMonkey Bill Export", 14, 16);
-        doc.setFontSize(10);
-        doc.text(`Exported on: ${new Date().toLocaleDateString()}`, 14, 22);
-        
-        const fromDate = $('exportDateFrom').value;
-        const toDate = $('exportDateTo').value;
-        if(fromDate || toDate){
-            doc.text(`Date Range: ${fromDate || 'Start'} to ${toDate || 'End'}`, 14, 26);
-        }
-
-        const head = [['Date', 'Name', 'Your Share', 'Total', 'Category', 'Paid']];
-        const body = filteredBills.map(bill => [
-            bill.date,
-            bill.name,
-            formatCurrency(getUserShare(bill)),
-            formatCurrency(bill.amount),
-            bill.category,
-            bill.paid ? 'Yes' : 'No'
-        ]);
-
-        doc.autoTable({
-            head: head,
-            body: body,
-            startY: 30,
-            theme: 'striped',
-            headStyles: { fillColor: [5, 150, 105] }, // --accent color
-        });
-
-        doc.save('QuarterMonkey_Export.pdf');
-    }
-
     function handleExportProfile() {
         try {
             const bills = localStorage.getItem('quarterMonkey.bills') || '[]';
             const settings = localStorage.getItem('quarterMonkey.settings') || '{}';
+            const wallpaper = localStorage.getItem('quarterMonkey.wallpaper') || null;
 
             const profileData = {
                 bills: JSON.parse(bills),
-                settings: JSON.parse(settings)
+                settings: JSON.parse(settings),
+                wallpaper: wallpaper
             };
 
             const profileContent = JSON.stringify(profileData, null, 2);
@@ -1211,6 +1242,43 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
             console.error("Failed to export profile:", error);
             alert("Could not export profile. See console for details.");
         }
+    }
+
+    function handleImportProfile() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json,.json';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const profileData = JSON.parse(event.target.result);
+                    if (profileData && profileData.bills && profileData.settings) {
+                        localStorage.setItem('quarterMonkey.bills', JSON.stringify(profileData.bills));
+                        localStorage.setItem('quarterMonkey.settings', JSON.stringify(profileData.settings));
+                        
+                        if (profileData.wallpaper) {
+                            localStorage.setItem('quarterMonkey.wallpaper', profileData.wallpaper);
+                        } else {
+                            localStorage.removeItem('quarterMonkey.wallpaper');
+                        }
+
+                        alert('Profile imported successfully! The application will now reload.');
+                        location.reload();
+                    } else {
+                        alert('Invalid profile file. Please select a valid QuarterMonkey profile.');
+                    }
+                } catch (error) {
+                    console.error("Failed to import profile:", error);
+                    alert('Could not import profile. The file may be corrupted or not in the correct format.');
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
     }
     
     // --- EVENT LISTENERS ---
@@ -1236,6 +1304,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     pastBillsListBody.addEventListener('dblclick', handleListDoubleClick);
     saveEditBtn.addEventListener('click', handleSaveEdit);
     closeModalBtn.addEventListener('click', closeEditModal);
+    $('closeDayBreakdownModalBtn').addEventListener('click', closeDayBreakdownModal);
     darkToggle.addEventListener('click', handleToggleDarkMode);
     menuBtn.addEventListener('click', () => menuPanel.style.display = 'block');
     closeMenuNotch.addEventListener('click', () => menuPanel.style.display = 'none');
@@ -1244,9 +1313,8 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     [currentBalance, paycheckAmount, nextPayday, payFrequency].forEach(el => el.addEventListener('change', () => { saveData(); renderApp(true); }));
     document.querySelectorAll('.menu-panel input, .menu-panel select').forEach(el => { const event = el.type === 'range' || el.type === 'color' ? 'input' : 'change'; el.addEventListener(event, () => { if(el.id === 'enableSplitBillMode') syncExperimentalFeatures(); else applyAllAppearance(); saveData(); }); });
     wallpaperFile.addEventListener('change', handleWallpaperFile);
-    $('exportCsvBtn').addEventListener('click', handleExportCSV);
-    $('exportPdfBtn').addEventListener('click', handleExportPDF);
     $('exportProfileBtn').addEventListener('click', handleExportProfile);
+    $('importProfileBtn').addEventListener('click', handleImportProfile);
     window.addEventListener('resize', () => { resizeCanvas(ambianceCanvas); applyAmbianceSettings(); });
     
     // --- INITIALIZATION ---
