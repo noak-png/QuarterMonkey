@@ -181,7 +181,65 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
 .stack{ display:flex; flex-direction:column; gap:8px; } .hr{ border:none; border-top:1px solid var(--border); margin:6px 0; }
 
 @media (max-width: 768px) { body { padding: 10px; } .app { gap: 16px; } .dashboard-container, .dashboard-row { grid-template-columns: 1fr; } main#billTrackerCard { max-height: calc(100vh - 250px); } .menu-panel{ right:8px; left:8px; width:auto; top:70px; } .calendar-day { min-height: 80px; } }
+
+@media print {
+    body > *:not(#app), 
+    #app > *:not(#calendarView),
+    .menu-panel, .clock-display, #editModal, #archiveView {
+        display: none !important;
+    }
+    .app, body {
+        padding: 0;
+        margin: 0;
+        background: none;
+    }
+    #calendarView {
+        display: block !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: white !important;
+        color: black !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .glass {
+        background: transparent !important;
+        backdrop-filter: none !important;
+        --glass-stroke: #ccc !important;
+        border-color: #ccc !important;
+    }
+    .calendar-header .ctrl-btn {
+        display: none !important;
+    }
+    .calendar-header h2 {
+        color: black !important;
+    }
+    .bill-item-calendar {
+        background-color: #eee !important;
+        color: #333 !important;
+        border: 1px solid #ddd;
+    }
+    .bill-item-calendar.paid {
+        background-color: #e8f5e9 !important;
+        color: #2e7d32 !important;
+        text-decoration: none;
+    }
+    .calendar-day.today .day-number {
+        background-color: #ddd !important;
+        color: black !important;
+    }
+    :root {
+        --text: #000;
+        --muted: #555;
+        --card: #fff;
+        --bg: #fff;
+        --border: #ccc;
+    }
+}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf-autotable.min.js"></script>
 </head>
 <body>
   <canvas id="ambianceCanvas"></canvas>
@@ -199,7 +257,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         <div class="dashboard-row">
             <div class="summary-card glass"><h3 id="totalAmountLabel">Current Balance</h3><div class="amount total" id="totalAmount">$0.00</div></div>
             <div class="summary-card glass"><h3 id="totalDueNext10DaysLabel">Total Due (Next 10 Days)</h3><div class="amount unpaid" id="totalDueNext10Days">$0.00</div></div>
-            <div class="summary-card glass"><h3 id="yourShareNext10DaysLabel">Your Share (Next 10 Days)</h3><div class="amount total" id="yourShareNext10Days">$0.00</div></div>
+            <div class="summary-card glass" id="yourShareCard"><h3 id="yourShareNext10DaysLabel">Your Share (Next 10 Days)</h3><div class="amount total" id="yourShareNext10Days">$0.00</div></div>
             <div id="upcomingBills" class="glass"><h2>Upcoming Bills</h2><div id="upcomingBillsList"></div></div>
         </div>
         <div class="dashboard-row">
@@ -295,7 +353,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
           <div class="sub-section"><details><summary>Animations</summary><div class="content"><label><input type="checkbox" id="enableNaturalSlide"> Natural Slide Animation</label><div class="slider-row"><label for="slideSpeed">Speed</label><input type="range" id="slideSpeed" min="200" max="1400" value="800" /><span class="pct" id="slideSpeedPct"></span></div></div></details></div>
           <div class="sub-section"><details><summary>Background</summary><div class="content"><div class="stack"><label><input type="checkbox" id="enableCustomBackground">Enable Custom Background</label></div><div id="customBackgroundOptions" class="stack" style="display:none;"><div class="hr"></div><div class="stack"><label for="backgroundType">Type</label><select id="backgroundType"><option value="theme" selected>Theme</option><option value="image">Image</option><option value="color">Gradient</option></select></div><div id="imageWallpaperControls" style="display:none; margin-top: 10px;"><input type="file" id="wallpaperFile" accept="image/*" /></div><div id="colorWallpaperControls" class="stack" style="display:none; margin-top: 10px;"><label>Start Color: <input type="color" id="wallpaperColor3" value="#1e1b4b"></label><label>End Color: <input type="color" id="wallpaperColor2" value="#4c1d95"></label><div class="slider-row"><label for="gradientAngle">Angle</label><input type="range" id="gradientAngle" min="0" max="360" value="145"><span class="pct" id="gradientAnglePct"></span></div><div class="stack"><label><input type="checkbox" id="gradientSpinToggle">Enable Spinning</label><div class="slider-row" id="gradientSpinControls" style="display:none;"><label for="gradientSpinSpeed">Speed</label><input type="range" id="gradientSpinSpeed" min="1" max="100" value="10"><span class="pct" id="gradientSpinSpeedPct"></span></div></div></div></div><div class="hr"></div><div class="stack"><label><input type="checkbox" id="enableAmbiance">Enable Live Effects</label><div id="ambianceSettings" class="stack" style="display:none; margin-top: 10px;"><select id="ambianceSelect"><option value="none" selected>None</option><option value="snowflakes">Snowflakes</option><option value="orbs">Orbs</option><option value="starfield">Starfield</option></select><div id="ambianceControls" class="stack" style="display:none; border:1px solid var(--border); border-radius:8px; padding:10px; gap: 10px;"><div id="snowControls" class="stack" style="display:none;"><div class="slider-row"><label>Density</label><input type="range" id="snowDensity" min="0" max="300" value="100"><span class="pct" id="snowDensityPct"></span></div><div class="slider-row"><label>Size</label><input type="range" id="snowSize" min="10" max="40" value="20"><span class="pct" id="snowSizePct"></span></div><div class="slider-row"><label>Speed</label><input type="range" id="snowSpeed" min="10" max="100" value="30"><span class="pct" id="snowSpeedPct"></span></div></div><div id="orbsControls" class="stack" style="display:none;"><div class="slider-row"><label>Density</label><input type="range" id="orbsDensity" min="10" max="150" value="40"><span class="pct" id="orbsDensityPct"></span></div><div class="slider-row"><label>Size</label><input type="range" id="orbsSize" min="20" max="150" value="70"><span class="pct" id="orbsSizePct"></span></div><div class="slider-row"><label>Speed</label><input type="range" id="orbsSpeed" min="5" max="100" value="20"><span class="pct" id="orbsSpeedPct"></span></div><label>Color: <input type="color" id="orbsColor" value="#9aa4b2"></label></div><div id="starfieldControls" class="stack" style="display:none;"><div class="slider-row"><label>Density</label><input type="range" id="starfieldDensity" min="50" max="1500" value="500"><span class="pct" id="starfieldDensityPct"></span></div><div class="slider-row"><label>Speed</label><input type="range" id="starfieldSpeed" min="1" max="100" value="25"><span class="pct" id="starfieldSpeedPct"></span></div></div></div></div></div></div></details></div>
     </div></details></div>
-    <div class="section"><details><summary>Utility</summary><div class="content"><div class="stack"><label><input type="checkbox" id="enableClock"> Enable Clock</label><div id="clockOptionsWrapper" class="stack" style="display:none;"><label for="clockPosition">Position</label><select id="clockPosition"><option value="pos-top-left">Top Left</option><option value="pos-top-center">Top Center</option><option value="pos-top-right" selected>Top Right</option><option value="pos-bottom-left">Bottom Left</option><option value="pos-bottom-center">Bottom Center</option><option value="pos-bottom-right">Bottom Right</option></select><label for="clockDetail">Detail Level</label><select id="clockDetail"><option value="time">Time</option><option value="timeSec">Time w/ Seconds</option><option value="dateTime" selected>Date & Time</option></select></div></div><div class="hr"></div><div class="sub-section"><details><summary>Experimental</summary><div class="content"><label><input type="checkbox" id="enableSplitBillMode"> Enable Split Bill Mode</label><p style="font-size:12px;color:var(--muted);margin:4px 0 0;">Adds options to split a bill with another person.</p></div></details></div></div></details></div>
+    <div class="section"><details><summary>Utility</summary><div class="content"><div class="stack"><label><input type="checkbox" id="enableClock"> Enable Clock</label><div id="clockOptionsWrapper" class="stack" style="display:none;"><label for="clockPosition">Position</label><select id="clockPosition"><option value="pos-top-left">Top Left</option><option value="pos-top-center">Top Center</option><option value="pos-top-right" selected>Top Right</option><option value="pos-bottom-left">Bottom Left</option><option value="pos-bottom-center">Bottom Center</option><option value="pos-bottom-right">Bottom Right</option></select><label for="clockDetail">Detail Level</label><select id="clockDetail"><option value="time">Time</option><option value="timeSec">Time w/ Seconds</option><option value="dateTime" selected>Date & Time</option></select></div></div><div class="hr"></div><div class="sub-section"><details><summary>Export Data</summary><div class="content"><div class="stack"><p style="font-size:12px;color:var(--muted);margin:4px 0 0;">Export your bills and financial data. Select a date range or leave blank to export all data.</p><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><label>From: <input type="date" id="exportDateFrom" style="width:100%"></label><label>To: <input type="date" id="exportDateTo" style="width:100%"></label></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;"><button id="exportCsvBtn" class="ctrl-btn" style="width:100%; height:auto; padding: 10px;">Export CSV</button><button id="exportPdfBtn" class="ctrl-btn" style="width:100%; height:auto; padding: 10px;">Export PDF</button></div></div></div></details></div><div class="hr"></div><div class="sub-section"><details><summary>Experimental</summary><div class="content"><label><input type="checkbox" id="enableSplitBillMode"> Enable Split Bill Mode</label><p style="font-size:12px;color:var(--muted);margin:4px 0 0;">Adds options to split a bill with another person.</p></div></details></div></div></details></div>
     <div class="menu-notch"><button id="closeMenuNotch">Close</button></div>
   </div>
 
@@ -342,7 +400,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     const formatDate = (dateStr) => { const d = new Date(dateStr + 'T00:00:00'); return { month: d.toLocaleString('default', { month: 'short' }).toUpperCase(), day: d.getDate() }; };
     const getCountdown = (dateStr) => { const d = Math.ceil((new Date(dateStr + 'T23:59:59') - new Date()) / 864e5); if (d > 1) return `${d} days left`; if (d === 1) return `Due tomorrow`; if (d <= 0 && d > -1) return `Due today`; return `${Math.abs(d-1)} days overdue`; };
     const resizeCanvas = (cv) => { const dpr = window.devicePixelRatio || 1; cv.width = window.innerWidth * dpr; cv.height = window.innerHeight * dpr; cv.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); };
-    const getUserShare = bill => (bill.isSplit && bill.splitWithAmount) ? bill.amount - bill.splitWithAmount : bill.amount;
+    const getUserShare = bill => (enableSplitBillMode.checked && bill.isSplit && bill.splitWithAmount) ? bill.amount - bill.splitWithAmount : bill.amount;
 
     // --- DATA & STATE ---
     function saveData() {
@@ -487,9 +545,12 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         const header = document.createElement('div');
         header.className = 'calendar-header';
         header.innerHTML = `
-            <button id="prevMonthBtn" title="Previous Month">‹</button>
+            <button id="prevMonthBtn" title="Previous Month" class="ctrl-btn">‹</button>
             <h2>${monthName} ${year}</h2>
-            <button id="nextMonthBtn" title="Next Month">›</button>
+            <span style="display: flex; gap: 8px;">
+                <button id="printCalendarBtn" title="Print Calendar" class="ctrl-btn">🖨️</button>
+                <button id="nextMonthBtn" title="Next Month" class="ctrl-btn">›</button>
+            </span>
         `;
         calendarView.appendChild(header);
 
@@ -516,15 +577,21 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
                 dayCell.classList.add('today');
             }
 
-            let dayHeaderHTML = `<div class="day-number">${day}</div>`;
-            if (paydays.includes(day)) {
-                dayHeaderHTML += `<div class="day-balance">Payday 💰</div>`;
-            }
-            
             const billsOnDay = bills.filter(b => {
                 const billDate = new Date(b.date + 'T00:00:00');
                 return billDate.getFullYear() === year && billDate.getMonth() === month && billDate.getDate() === day;
             });
+
+            let dayHeaderHTML = `<div class="day-number">${day}</div>`;
+            let dayExtrasHTML = '';
+            
+            const dailyTotal = billsOnDay.reduce((sum, bill) => sum + (bill.paid ? 0 : getUserShare(bill)), 0);
+            if (dailyTotal > 0) {
+                dayExtrasHTML += `<div class="day-balance negative">${formatCurrency(dailyTotal)}</div>`;
+            }
+            if (paydays.includes(day)) {
+                dayExtrasHTML += `<div class="day-balance">Payday 💰</div>`;
+            }
 
             let billsHTML = '';
             if (billsOnDay.length > 0) {
@@ -536,7 +603,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
                 }).join('');
             }
             
-            dayCell.innerHTML = `<div class="day-header">${dayHeaderHTML}</div><div class="bills-on-day">${billsHTML}</div>`;
+            dayCell.innerHTML = `<div class="day-header">${dayHeaderHTML}<div>${dayExtrasHTML}</div></div><div class="bills-on-day">${billsHTML}</div>`;
             grid.appendChild(dayCell);
         }
         calendarView.appendChild(grid);
@@ -621,6 +688,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         const isEnabled = enableSplitBillMode.checked;
         splitBillInputs.style.display = isEnabled ? 'grid' : 'none';
         $('amountColumnHeader').textContent = isEnabled ? 'Amount (Your Share)' : 'Amount';
+        $('yourShareCard').style.display = isEnabled ? 'flex' : 'none';
         renderApp(true);
     }
     function startClock() { if (!clockInterval) { clockInterval = setInterval(updateClock, 1000); updateClock(); } }
@@ -694,9 +762,17 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         bill.frequency = $('editBillFrequency').value;
         bill.notes = $('editBillNotes').value.trim();
         if (enableSplitBillMode.checked) {
-            bill.isSplit = true;
-            bill.splitWithName = $('editBillSplitName').value.trim();
-            bill.splitWithAmount = parseFloat($('editBillSplitAmount').value) || 0;
+            const splitName = $('editBillSplitName').value.trim();
+            const splitAmount = parseFloat($('editBillSplitAmount').value) || 0;
+            if (splitName && splitAmount > 0) {
+                bill.isSplit = true;
+                bill.splitWithName = splitName;
+                bill.splitWithAmount = splitAmount;
+            } else {
+                bill.isSplit = false;
+                bill.splitWithName = '';
+                bill.splitWithAmount = 0;
+            }
         }
         saveData();
         renderApp(true);
@@ -830,7 +906,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     function mainLoop() {
         if (gradientSpinToggle.checked && enableCustomBackground.checked && backgroundType.value === 'color') {
             const currentAngle = parseFloat(gradientAngle.value);
-            gradientAnimationAngle = (gradientAnimationAngle + (parseFloat(gradientSpinSpeed.value) / 20)) % 360;
+            gradientAnimationAngle = (gradientAnimationAngle + (parseFloat(gradientSpinSpeed.value) / 200)) % 360;
             document.body.style.backgroundImage = `linear-gradient(${currentAngle + gradientAnimationAngle}deg, ${wallpaperColor3.value}, ${wallpaperColor2.value})`;
         }
 
@@ -927,7 +1003,111 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     const handleListDoubleClick = (e) => { const tr = e.target.closest('tr[data-id]'); if (tr && !e.target.closest('.actions-cell')) openEditModal(Number(tr.dataset.id)); };
     const handleToggleDarkMode = () => { document.documentElement.classList.toggle('dark'); const isDark = document.documentElement.classList.contains('dark'); darkToggle.innerHTML = isDark ? '☀️' : '🌙'; applyMaterialStyle(); saveData(); };
     const handleWallpaperFile = (e) => { const file = e.target.files[0]; if (file && file.size < 5*1024*1024) { const reader = new FileReader(); reader.onload = (e) => { localStorage.setItem('quarterMonkey.wallpaper', e.target.result); updateWallpaper(); saveData(); }; reader.readAsDataURL(file); } else if (file) alert('Image too large (max 5MB).'); };
-    const handleCalendarNav = (e) => { if(e.target.id === 'prevMonthBtn') calendarDate.setMonth(calendarDate.getMonth() - 1); if(e.target.id === 'nextMonthBtn') calendarDate.setMonth(calendarDate.getMonth() + 1); renderCalendar(); };
+    const handleCalendarNav = (e) => {
+        let reRender = false;
+        if (e.target.closest('#prevMonthBtn')) {
+            calendarDate.setMonth(calendarDate.getMonth() - 1);
+            reRender = true;
+        } else if (e.target.closest('#nextMonthBtn')) {
+            calendarDate.setMonth(calendarDate.getMonth() + 1);
+            reRender = true;
+        } else if (e.target.closest('#printCalendarBtn')) {
+            window.print();
+        }
+        if (reRender) {
+            renderCalendar();
+        }
+    };
+
+    function getFilteredBills() {
+        const fromDate = $('exportDateFrom').value;
+        const toDate = $('exportDateTo').value;
+        let filteredBills = [...bills]; // Create a copy to avoid modifying the original array
+        if (fromDate) {
+            filteredBills = filteredBills.filter(b => b.date >= fromDate);
+        }
+        if (toDate) {
+            filteredBills = filteredBills.filter(b => b.date <= toDate);
+        }
+        return filteredBills.sort((a, b) => new Date(a.date) - new Date(b.date));
+    }
+
+    function handleExportCSV() {
+        const filteredBills = getFilteredBills();
+        if (filteredBills.length === 0) {
+            alert("No bills to export in the selected date range.");
+            return;
+        }
+        const headers = ['ID', 'Name', 'Total Amount', 'Your Share', 'Date', 'Frequency', 'Category', 'Notes', 'Paid', 'Is Split', 'Split With Name', 'Their Share'];
+        const csvRows = [headers.join(',')];
+        for (const bill of filteredBills) {
+            const values = [
+                bill.id,
+                `"${bill.name.replace(/"/g, '""')}"`,
+                bill.amount,
+                getUserShare(bill),
+                bill.date,
+                bill.frequency,
+                bill.category,
+                `"${(bill.notes || '').replace(/"/g, '""')}"`,
+                bill.paid,
+                bill.isSplit || false,
+                `"${(bill.splitWithName || '').replace(/"/g, '""')}"`,
+                bill.splitWithAmount || 0
+            ];
+            csvRows.push(values.join(','));
+        }
+        const csvContent = csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "QuarterMonkey_Export.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function handleExportPDF() {
+        const filteredBills = getFilteredBills();
+        if (filteredBills.length === 0) {
+            alert("No bills to export in the selected date range.");
+            return;
+        }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.text("QuarterMonkey Bill Export", 14, 16);
+        doc.setFontSize(10);
+        doc.text(`Exported on: ${new Date().toLocaleDateString()}`, 14, 22);
+        
+        const fromDate = $('exportDateFrom').value;
+        const toDate = $('exportDateTo').value;
+        if(fromDate || toDate){
+            doc.text(`Date Range: ${fromDate || 'Start'} to ${toDate || 'End'}`, 14, 26);
+        }
+
+        const head = [['Date', 'Name', 'Your Share', 'Total', 'Category', 'Paid']];
+        const body = filteredBills.map(bill => [
+            bill.date,
+            bill.name,
+            formatCurrency(getUserShare(bill)),
+            formatCurrency(bill.amount),
+            bill.category,
+            bill.paid ? 'Yes' : 'No'
+        ]);
+
+        doc.autoTable({
+            head: head,
+            body: body,
+            startY: 30,
+            theme: 'striped',
+            headStyles: { fillColor: [5, 150, 105] }, // --accent color
+        });
+
+        doc.save('QuarterMonkey_Export.pdf');
+    }
     
     // --- EVENT LISTENERS ---
     addBillBtnHeader.addEventListener('click', () => {
@@ -960,6 +1140,8 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     [currentBalance, paycheckAmount, nextPayday, payFrequency].forEach(el => el.addEventListener('change', () => { saveData(); renderApp(true); }));
     document.querySelectorAll('.menu-panel input, .menu-panel select').forEach(el => { const event = el.type === 'range' || el.type === 'color' ? 'input' : 'change'; el.addEventListener(event, () => { if(el.id === 'enableSplitBillMode') syncExperimentalFeatures(); else applyAllAppearance(); saveData(); }); });
     wallpaperFile.addEventListener('change', handleWallpaperFile);
+    $('exportCsvBtn').addEventListener('click', handleExportCSV);
+    $('exportPdfBtn').addEventListener('click', handleExportPDF);
     window.addEventListener('resize', () => { resizeCanvas(ambianceCanvas); applyAmbianceSettings(); });
     
     // --- INITIALIZATION ---
