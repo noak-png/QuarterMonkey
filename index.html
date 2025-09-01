@@ -61,6 +61,7 @@ h2, h3 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 60
 .link-button { background: transparent; border: none; color: var(--accent); cursor: pointer; font-size: 14px; padding: 8px; font-weight: 600; }
 .link-button:hover { text-decoration: underline; }
 .summary-card .amount { font-size: 26px; font-weight: 700; line-height: 1.1; margin-top: auto; }
+.summary-card .projected-balance { font-size: 12px; color: var(--muted); margin-top: 4px; height: 1.2em; font-weight: 600; }
 .summary-card .amount.paid { color: var(--ok); } .summary-card .amount.unpaid { color: var(--danger); } .summary-card .amount.total { color: var(--accent); }
 .finance-card .finance-row { display: grid; grid-template-columns: max-content 1fr; gap: 12px; align-items: center; }
 .finance-card label { font-weight: 600; font-size: 13px; text-align: right; }
@@ -69,8 +70,7 @@ h2, h3 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 60
 #expenseTrackerCard button { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
 /* Upcoming & 30-Day Bills */
-#upcomingBillsList, #next30DaysList { display: flex; flex-direction: column; gap: 8px; }
-#next30DaysList { max-height: 125px; overflow-y: auto; padding-right: 5px; }
+#upcomingBillsList, #next30DaysList { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; overflow-y: auto; padding-right: 5px; min-height: 100px; }
 .upcoming-item { display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.05); padding: 6px 10px; border-radius: 8px; }
 .upcoming-item .name { font-weight: 600; font-size: 14px; }
 .upcoming-item .details { font-size: 13px; text-align: right; }
@@ -256,8 +256,8 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     <div class="dashboard-container">
         <div class="dashboard-row">
             <div class="summary-card glass"><h3 id="totalAmountLabel">Current Balance</h3><div class="amount total" id="totalAmount">$0.00</div></div>
-            <div class="summary-card glass"><h3 id="totalDueNext10DaysLabel">Total Due (Next 10 Days)</h3><div class="amount unpaid" id="totalDueNext10Days">$0.00</div></div>
-            <div class="summary-card glass" id="yourShareCard"><h3 id="yourShareNext10DaysLabel">Your Share (Next 10 Days)</h3><div class="amount total" id="yourShareNext10Days">$0.00</div></div>
+            <div class="summary-card glass"><h3 id="totalDueNext10DaysLabel">Total Due (Next 10 Days)</h3><div class="amount unpaid" id="totalDueNext10Days">$0.00</div><div class="projected-balance" id="projectedBalanceTotal"></div></div>
+            <div class="summary-card glass" id="yourShareCard"><h3 id="yourShareNext10DaysLabel">Your Share (Next 10 Days)</h3><div class="amount total" id="yourShareNext10Days">$0.00</div><div class="projected-balance" id="projectedBalanceShare"></div></div>
             <div id="upcomingBills" class="glass"><h2>Upcoming Bills</h2><div id="upcomingBillsList"></div></div>
         </div>
         <div class="dashboard-row">
@@ -400,7 +400,18 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     // --- UTILITY ---
     const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
     const formatDate = (dateStr) => { const d = new Date(dateStr + 'T00:00:00'); return { month: d.toLocaleString('default', { month: 'short' }).toUpperCase(), day: d.getDate() }; };
-    const getCountdown = (dateStr) => { const d = Math.ceil((new Date(dateStr + 'T23:59:59') - new Date()) / 864e5); if (d > 1) return `${d} days left`; if (d === 1) return `Due tomorrow`; if (d <= 0 && d > -1) return `Due today`; return `${Math.abs(d-1)} days overdue`; };
+    const getCountdown = (dateStr) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const dueDate = new Date(dateStr + 'T00:00:00');
+        const diffTime = dueDate.getTime() - today.getTime();
+        const diffDays = Math.round(diffTime / 864e5);
+
+        if (diffDays > 1) return `${diffDays} days left`;
+        if (diffDays === 1) return 'Due tomorrow';
+        if (diffDays === 0) return 'Due today';
+        return `${Math.abs(diffDays)} days overdue`;
+    };
     const resizeCanvas = (cv) => { const dpr = window.devicePixelRatio || 1; cv.width = window.innerWidth * dpr; cv.height = window.innerHeight * dpr; cv.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); };
     const getUserShare = bill => (enableSplitBillMode.checked && bill.isSplit && bill.splitWithAmount) ? bill.amount - bill.splitWithAmount : bill.amount;
 
@@ -515,16 +526,17 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         return tr;
     }
     function getPaydaysForMonth(year, month) {
-        if (!userFinances.payday) return [];
+        if (!nextPayday.value) return [];
         const paydays = [];
-        let currentPayday = new Date(userFinances.payday + 'T00:00:00');
-        const frequency = userFinances.frequency || 'Bi-Weekly';
+        let currentPayday = new Date(nextPayday.value + 'T00:00:00');
+        const frequency = payFrequency.value || 'Bi-Weekly';
 
         // Find the first payday in or before the current month
         while (currentPayday.getFullYear() > year || (currentPayday.getFullYear() === year && currentPayday.getMonth() > month)) {
             if (frequency === 'Weekly') currentPayday.setDate(currentPayday.getDate() - 7);
             else if (frequency === 'Bi-Weekly') currentPayday.setDate(currentPayday.getDate() - 14);
             else if (frequency === 'Monthly') currentPayday.setMonth(currentPayday.getMonth() - 1);
+            else break;
         }
         
         // Iterate through the month and add paydays
@@ -535,6 +547,43 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
             if (frequency === 'Weekly') currentPayday.setDate(currentPayday.getDate() + 7);
             else if (frequency === 'Bi-Weekly') currentPayday.setDate(currentPayday.getDate() + 14);
             else if (frequency === 'Monthly') currentPayday.setMonth(currentPayday.getMonth() + 1);
+            else break;
+        }
+        return paydays;
+    }
+
+    function getPaydaysInRange(startDate, endDate) {
+        if (!nextPayday.value) return [];
+        const paydays = [];
+        let currentPayday = new Date(nextPayday.value + 'T00:00:00');
+        const frequency = payFrequency.value || 'Bi-Weekly';
+        
+        // Go backward until currentPayday is before the startDate to catch all possible paydays in range
+        while (currentPayday > startDate) {
+            if (frequency === 'Weekly') currentPayday.setDate(currentPayday.getDate() - 7);
+            else if (frequency === 'Bi-Weekly') currentPayday.setDate(currentPayday.getDate() - 14);
+            else if (frequency === 'Monthly') {
+                // More careful month subtraction
+                let d = currentPayday.getDate();
+                currentPayday.setMonth(currentPayday.getMonth() - 1);
+                // If date changed (e.g. from Mar 31 to Feb 28), reset to last day of month
+                if (currentPayday.getDate() !== d) currentPayday.setDate(0);
+            }
+            else break;
+        }
+
+        // Go forward and collect paydays in range
+        while (currentPayday <= endDate) {
+            if (currentPayday >= startDate) {
+                paydays.push(new Date(currentPayday));
+            }
+            if (frequency === 'Weekly') currentPayday.setDate(currentPayday.getDate() + 7);
+            else if (frequency === 'Bi-Weekly') currentPayday.setDate(currentPayday.getDate() + 14);
+            else if (frequency === 'Monthly') {
+                let d = currentPayday.getDate();
+                currentPayday.setMonth(currentPayday.getMonth() + 1);
+                if (currentPayday.getDate() !== d) currentPayday.setDate(0);
+            }
             else break;
         }
         return paydays;
@@ -684,6 +733,27 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
 
         totalDueNext10DaysEl.textContent = formatCurrency(totalDue);
         yourShareNext10DaysEl.textContent = formatCurrency(yourShare);
+        
+        // New logic for projected balance
+        const paycheck = parseFloat(paycheckAmount.value) || 0;
+        const projectedTotalEl = $('projectedBalanceTotal');
+        const projectedShareEl = $('projectedBalanceShare');
+
+        if (projectedTotalEl && projectedShareEl) {
+            if (paycheck > 0 && nextPayday.value) {
+                const paydaysInRange = getPaydaysInRange(today, tenDaysFromNow);
+                const upcomingIncome = paydaysInRange.length * paycheck;
+
+                const projectedBalanceTotal = balance - totalDue + upcomingIncome;
+                const projectedBalanceShare = balance - yourShare + upcomingIncome;
+                
+                projectedTotalEl.textContent = `Balance after: ${formatCurrency(projectedBalanceTotal)}`;
+                projectedShareEl.textContent = `Balance after: ${formatCurrency(projectedBalanceShare)}`;
+            } else {
+                projectedTotalEl.textContent = '';
+                projectedShareEl.textContent = '';
+            }
+        }
     }
     
     // --- FEATURES & CLOCK ---
@@ -1083,8 +1153,8 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
             alert("No bills to export in the selected date range.");
             return;
         }
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        // Corrected instantiation below
+        const doc = new window.jspdf.jsPDF();
 
         doc.text("QuarterMonkey Bill Export", 14, 16);
         doc.setFontSize(10);
