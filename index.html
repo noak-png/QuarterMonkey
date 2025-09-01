@@ -89,6 +89,7 @@ h2, h3 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 60
 
 /* Pending & 30-Day Bills */
 #pendingBillsList, #next30DaysList { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; overflow-y: auto; padding-right: 5px; min-height: 80px; }
+#next30DaysList { max-height: 207px; /* Approx 4 items */ }
 .upcoming-item { display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.05); padding: 6px 10px; border-radius: 8px; }
 .upcoming-item .name { font-weight: 600; font-size: 14px; }
 .upcoming-item .details { font-size: 13px; text-align: right; }
@@ -96,7 +97,7 @@ h2, h3 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 60
 .upcoming-item .countdown { color: var(--muted); font-size: 11px; }
 
 /* Add Bill Form & Bill List Table */
-main.card { max-height: calc(100vh - 450px); }
+main.card { max-height: calc(100vh - 338px); }
 .bill-table-wrapper { width: 100%; overflow-y: auto; flex-grow: 1; }
 .bill-table-wrapper.scrollable {
     max-height: 220px; /* Approx height of 3 rows */
@@ -259,7 +260,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
 .menu-notch button{ border:none; cursor:pointer; font-weight:600; padding:12px 16px; border-radius:999px; background:var(--card); color:var(--text); border:1px solid var(--border); box-shadow:var(--shadow); }
 .stack{ display:flex; flex-direction:column; gap:8px; } .hr{ border:none; border-top:1px solid var(--border); margin:6px 0; }
 
-@media (max-width: 768px) { body { padding: 10px; } .app { gap: 16px; } .dashboard-container, .dashboard-row { grid-template-columns: 1fr; } main#billTrackerCard { max-height: calc(100vh - 250px); } .menu-panel{ right:8px; left:8px; width:auto; top:70px; } .calendar-day { min-height: 80px; } }
+@media (max-width: 768px) { body { padding: 10px; } .app { gap: 16px; } .dashboard-container, .dashboard-row { grid-template-columns: 1fr; } main#billTrackerCard { max-height: calc(100vh - 188px); } .menu-panel{ right:8px; left:8px; width:auto; top:70px; } .calendar-day { min-height: 80px; } }
 
 @media print {
     body > *:not(#app), 
@@ -925,7 +926,7 @@ tr.paid .unpay-btn {
             return;
         }
         
-        next30.forEach(bill => {
+        next30.slice(0, 4).forEach(bill => {
             const item = document.createElement('div');
             item.className = 'upcoming-item';
             item.innerHTML = `
