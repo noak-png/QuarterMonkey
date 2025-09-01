@@ -63,13 +63,13 @@ h2, h3 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 60
 .summary-card .amount { font-size: 26px; font-weight: 700; line-height: 1.1; margin-top: auto; }
 .summary-card .amount.paid { color: var(--ok); } .summary-card .amount.unpaid { color: var(--danger); } .summary-card .amount.total { color: var(--accent); }
 .finance-card .finance-row { display: grid; grid-template-columns: max-content 1fr; gap: 12px; align-items: center; }
-.finance-card label { font-weight: 600; font-size: 13px; text-align: right; white-space: nowrap; }
-.finance-card input, .finance-card select, #expenseTrackerCard input, #expenseTrackerCard select { flex-grow: 1; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--text); font-size: 14px; }
+.finance-card label { font-weight: 600; font-size: 13px; text-align: right; }
+.finance-card input, .finance-card select, #expenseTrackerCard input, #expenseTrackerCard select { flex-grow: 1; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--text); font-size: 14px; width: 100%; min-width: 0; }
 #expenseTrackerCard form { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
 #expenseTrackerCard button { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
 /* Upcoming & 30-Day Bills */
-#upcomingBillsList, #next30DaysList { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
+#upcomingBillsList, #next30DaysList { display: flex; flex-direction: column; gap: 8px; }
 #next30DaysList { max-height: 125px; overflow-y: auto; padding-right: 5px; }
 .upcoming-item { display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.05); padding: 6px 10px; border-radius: 8px; }
 .upcoming-item .name { font-weight: 600; font-size: 14px; }
@@ -239,7 +239,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf-autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf-autotable.umd.min.js"></script>
 </head>
 <body>
   <canvas id="ambianceCanvas"></canvas>
@@ -266,6 +266,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
                 <h3>My Finances</h3>
                 <div class="stack">
                     <div class="finance-row"><label for="currentBalance">Balance:</label><input type="number" id="currentBalance" placeholder="$0.00"></div>
+<div class="finance-row"><label for="dontAutoDeduct">Don't auto-deduct:</label><input type="checkbox" id="dontAutoDeduct" style="width: auto; justify-self: start;"></div>
                     <div class="finance-row"><label for="paycheckAmount">Next/Est Paycheck:</label><input type="number" id="paycheckAmount" placeholder="$0.00"></div>
                     <div class="finance-row"><label for="nextPayday">Next Payday:</label><input type="date" id="nextPayday"></div>
                     <div class="finance-row"><label for="payFrequency">Frequency:</label><select id="payFrequency"><option>Weekly</option><option selected>Bi-Weekly</option><option>Monthly</option></select></div>
@@ -347,7 +348,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
   <div id="editModal" class="modal-overlay"><div class="modal-content glass"><h2>Edit Bill</h2><div class="modal-form"><label for="editBillName">Bill Name</label><input type="text" id="editBillName" class="full-width"><label for="editBillAmount">Total Amount</label><input type="number" step="0.01" id="editBillAmount" class="full-width"><label for="editBillDate">Due Date</label><input type="date" id="editBillDate" class="full-width"><label for="editBillCategory">Category</label><select id="editBillCategory" class="full-width"></select><label for="editBillFrequency">Frequency</label><select id="editBillFrequency" class="full-width"></select><label for="editBillNotes">Notes</label><textarea id="editBillNotes" class="full-width"></textarea><div id="editSplitBillInputs" class="full-width" style="display: none;"><hr><label>Split Info</label><input type="text" id="editBillSplitName" placeholder="Split with (Name)"><input type="number" id="editBillSplitAmount" placeholder="Their Share ($)"></div><div class="modal-buttons"><button type="button" class="cancel-btn" id="closeModalBtn">Cancel</button><button type="button" class="save-btn" id="saveEditBtn">Save Changes</button></div></div></div></div>
 
   <div class="menu-panel glass" id="menuPanel" aria-hidden="true">
-    <div class="section"><details open><summary>Appearance</summary>
+    <div class="section"><details><summary>Appearance</summary>
         <div class="content">
           <div class="sub-section"><details><summary>User Interface</summary><div class="content"><div class="stack"><label for="uiStyleSelect">Style</label><select id="uiStyleSelect"></select></div><div class="slider-row"><label for="glassOpacity">Opacity</label><input type="range" id="glassOpacity" min="10" max="100" value="80" /><span class="pct" id="glassOpacityPct"></span></div><div class="slider-row"><label for="glassBlurSlider">Blur</label><input type="range" id="glassBlurSlider" min="0" max="20" value="8" /><span class="pct" id="glassBlurPct"></span></div></div></details></div>
           <div class="sub-section"><details><summary>Animations</summary><div class="content"><label><input type="checkbox" id="enableNaturalSlide"> Natural Slide Animation</label><div class="slider-row"><label for="slideSpeed">Speed</label><input type="range" id="slideSpeed" min="200" max="1400" value="800" /><span class="pct" id="slideSpeedPct"></span></div></div></details></div>
@@ -391,6 +392,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     const orbsDensity = $('orbsDensity'), orbsSize = $('orbsSize'), orbsSpeed = $('orbsSpeed'), orbsColor = $('orbsColor');
     const starfieldDensity = $('starfieldDensity'), starfieldSpeed = $('starfieldSpeed');
     const enableSplitBillMode = $('enableSplitBillMode');
+    const dontAutoDeduct = $('dontAutoDeduct');
     const clockDisplay = $('clockDisplay'), enableClock = $('enableClock'), clockOptionsWrapper = $('clockOptionsWrapper'), clockPosition = $('clockPosition'), clockDetail = $('clockDetail');
     let ambianceParticles = [], gradientAnimationAngle = 0;
     const materialPresets = { glass: { styles: { 'default': { name: 'Default', light: '255,255,255', dark: '15,20,24' }, 'twilight': { name: 'Twilight', light: '235, 230, 255', dark: '30, 25, 45' }, 'graphite': { name: 'Graphite', light: '240,240,245', dark: '35,35,40' }, 'emerald': { name: 'Emerald', light: '240,255,245', dark: '20,40,30' }, 'blue': { name: 'Blue', light: '235,245,255', dark: '20,30,45' }, }}};
@@ -406,7 +408,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     function saveData() {
         try {
             localStorage.setItem('quarterMonkey.bills', JSON.stringify(bills));
-            const settings = { darkMode: document.documentElement.classList.contains('dark'), splitBillMode: enableSplitBillMode.checked, finances: { balance: currentBalance.value, paycheck: paycheckAmount.value, payday: nextPayday.value, frequency: payFrequency.value }, clock: { enabled: enableClock.checked, position: clockPosition.value, detail: clockDetail.value }, naturalSlide: { enabled: enableNaturalSlide.checked, speed: slideSpeed.value }, uiStyle: uiStyleSelect.value, glassOpacity: glassOpacity.value, glassBlur: glassBlurSlider.value, customBg: enableCustomBackground.checked, bgType: backgroundType.value, bgColor2: wallpaperColor2.value, bgColor3: wallpaperColor3.value, bgGradientAngle: gradientAngle.value, bgGradientSpin: gradientSpinToggle.checked, bgGradientSpinSpeed: gradientSpinSpeed.value, ambiance: enableAmbiance.checked, ambianceEffect: ambianceSelect.value, snowDensity: snowDensity.value, snowSize: snowSize.value, snowSpeed: snowSpeed.value, orbsDensity: orbsDensity.value, orbsSize: orbsSize.value, orbsSpeed: orbsSpeed.value, orbsColor: orbsColor.value, starfieldDensity: starfieldDensity.value, starfieldSpeed: starfieldSpeed.value };
+            const settings = { darkMode: document.documentElement.classList.contains('dark'), splitBillMode: enableSplitBillMode.checked, dontAutoDeduct: dontAutoDeduct.checked, finances: { balance: currentBalance.value, paycheck: paycheckAmount.value, payday: nextPayday.value, frequency: payFrequency.value }, clock: { enabled: enableClock.checked, position: clockPosition.value, detail: clockDetail.value }, naturalSlide: { enabled: enableNaturalSlide.checked, speed: slideSpeed.value }, uiStyle: uiStyleSelect.value, glassOpacity: glassOpacity.value, glassBlur: glassBlurSlider.value, customBg: enableCustomBackground.checked, bgType: backgroundType.value, bgColor2: wallpaperColor2.value, bgColor3: wallpaperColor3.value, bgGradientAngle: gradientAngle.value, bgGradientSpin: gradientSpinToggle.checked, bgGradientSpinSpeed: gradientSpinSpeed.value, ambiance: enableAmbiance.checked, ambianceEffect: ambianceSelect.value, snowDensity: snowDensity.value, snowSize: snowSize.value, snowSpeed: snowSpeed.value, orbsDensity: orbsDensity.value, orbsSize: orbsSize.value, orbsSpeed: orbsSpeed.value, orbsColor: orbsColor.value, starfieldDensity: starfieldDensity.value, starfieldSpeed: starfieldSpeed.value };
             localStorage.setItem('quarterMonkey.settings', JSON.stringify(settings));
         } catch (error) { console.error("Failed to save data:", error); }
     }
@@ -432,6 +434,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
             const settings = settingsData ? JSON.parse(settingsData) : {};
             if (settings.darkMode) { document.documentElement.classList.add('dark'); darkToggle.innerHTML = '☀️'; } else { darkToggle.innerHTML = '🌙';}
             enableSplitBillMode.checked = settings.splitBillMode || false;
+            dontAutoDeduct.checked = settings.dontAutoDeduct || false;
             userFinances = settings.finances || {};
             currentBalance.value = userFinances.balance || ''; paycheckAmount.value = userFinances.paycheck || ''; nextPayday.value = userFinances.payday || ''; payFrequency.value = userFinances.frequency || 'Bi-Weekly';
             const clockSettings = settings.clock || {};
@@ -820,6 +823,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         const type = backgroundType.value;
         $('imageWallpaperControls').style.display = type === 'image' ? 'block' : 'none';
         $('colorWallpaperControls').style.display = type === 'color' ? 'block' : 'none';
+        gradientSpinControls.style.display = gradientSpinToggle.checked ? 'flex' : 'none';
 
         if (type === 'image') {
             const wallpaper = localStorage.getItem('quarterMonkey.wallpaper');
@@ -961,8 +965,10 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
                 paid: true, isSplit: false, justAdded: true
             };
             bills.push(newExpenseAsBill);
-            const currentBalanceVal = parseFloat(currentBalance.value) || 0;
-            currentBalance.value = (currentBalanceVal - amount).toFixed(2);
+            if (!dontAutoDeduct.checked) {
+                const currentBalanceVal = parseFloat(currentBalance.value) || 0;
+                currentBalance.value = (currentBalanceVal - amount).toFixed(2);
+            }
             saveData();
             renderApp();
             expenseForm.reset();
@@ -977,12 +983,14 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
             if (target.matches('.pay-btn, .unpay-btn')) {
                 const wasPaid = bill.paid;
                 bill.paid = !bill.paid;
-                const share = getUserShare(bill);
-                const currentBalanceVal = parseFloat(currentBalance.value) || 0;
-                if (bill.paid && !wasPaid) {
-                    currentBalance.value = (currentBalanceVal - share).toFixed(2);
-                } else if (!bill.paid && wasPaid) {
-                    currentBalance.value = (currentBalanceVal + share).toFixed(2);
+                if (!dontAutoDeduct.checked) {
+                    const share = getUserShare(bill);
+                    const currentBalanceVal = parseFloat(currentBalance.value) || 0;
+                    if (bill.paid && !wasPaid) {
+                        currentBalance.value = (currentBalanceVal - share).toFixed(2);
+                    } else if (!bill.paid && wasPaid) {
+                        currentBalance.value = (currentBalanceVal + share).toFixed(2);
+                    }
                 }
                 saveData();
                 renderApp(true);
