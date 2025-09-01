@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>CoinMaster - Financial Forecaster</title>
+<title>QuarterMonkey - Financial Forecaster</title>
 
 <style>
 /* ========== Base Theme Variables ========== */
@@ -187,7 +187,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
   <canvas id="ambianceCanvas"></canvas>
   <div class="app" id="app">
     <header class="title-wrap glass">
-      <h1><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2ZM13,17H11V15H13V17ZM13,13H11V7H13V13Z" /></svg>CoinMaster</h1>
+      <h1><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2ZM13,17H11V15H13V17ZM13,13H11V7H13V13Z" /></svg>QuarterMonkey</h1>
       <div class="header-controls">
         <button id="darkToggle" class="ctrl-btn dark-toggle" title="Toggle Dark Mode">🌙</button>
         <button id="calendarToggleBtn" class="ctrl-btn" title="Toggle Calendar View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19,19H5V8H19M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M16.53,11.06L15.47,10L10.5,14.97L8.47,12.94L7.41,14L10.5,17.09L16.53,11.06Z"/></svg></button>
@@ -198,8 +198,8 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     <div class="dashboard-container">
         <div class="dashboard-row">
             <div class="summary-card glass"><h3 id="totalAmountLabel">Current Balance</h3><div class="amount total" id="totalAmount">$0.00</div></div>
-            <div class="summary-card glass"><h3 id="unpaidAmountLabel">Unpaid</h3><div class="amount unpaid" id="unpaidAmount">$0.00</div></div>
-            <div class="summary-card glass"><h3 id="paidAmountLabel">Paid</h3><div class="amount paid" id="paidAmount">$0.00</div></div>
+            <div class="summary-card glass"><h3 id="totalDueNext10DaysLabel">Total Due (Next 10 Days)</h3><div class="amount unpaid" id="totalDueNext10Days">$0.00</div></div>
+            <div class="summary-card glass"><h3 id="yourShareNext10DaysLabel">Your Share (Next 10 Days)</h3><div class="amount total" id="yourShareNext10Days">$0.00</div></div>
             <div id="upcomingBills" class="glass"><h2>Upcoming Bills</h2><div id="upcomingBillsList"></div></div>
         </div>
         <div class="dashboard-row">
@@ -293,7 +293,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         <div class="content">
           <div class="sub-section"><details><summary>User Interface</summary><div class="content"><div class="stack"><label for="uiStyleSelect">Style</label><select id="uiStyleSelect"></select></div><div class="slider-row"><label for="glassOpacity">Opacity</label><input type="range" id="glassOpacity" min="10" max="100" value="80" /><span class="pct" id="glassOpacityPct"></span></div><div class="slider-row"><label for="glassBlurSlider">Blur</label><input type="range" id="glassBlurSlider" min="0" max="20" value="8" /><span class="pct" id="glassBlurPct"></span></div></div></details></div>
           <div class="sub-section"><details><summary>Animations</summary><div class="content"><label><input type="checkbox" id="enableNaturalSlide"> Natural Slide Animation</label><div class="slider-row"><label for="slideSpeed">Speed</label><input type="range" id="slideSpeed" min="200" max="1400" value="800" /><span class="pct" id="slideSpeedPct"></span></div></div></details></div>
-          <div class="sub-section"><details><summary>Background</summary><div class="content"><div class="stack"><label><input type="checkbox" id="enableCustomBackground">Enable Custom Background</label></div><div id="customBackgroundOptions" class="stack" style="display:none;"><div class="hr"></div><div class="stack"><label for="backgroundType">Type</label><select id="backgroundType"><option value="theme" selected>Theme</option><option value="image">Image</option><option value="color">Gradient</option></select></div><div id="imageWallpaperControls" style="display:none; margin-top: 10px;"><input type="file" id="wallpaperFile" accept="image/*" /></div><div id="colorWallpaperControls" class="stack" style="display:none; margin-top: 10px;"><label>Start Color: <input type="color" id="wallpaperColor2" value="#3498db"></label><label>End Color: <input type="color" id="wallpaperColor3" value="#13223a"></label><div class="slider-row"><label for="gradientAngle">Angle</label><input type="range" id="gradientAngle" min="0" max="360" value="145"><span class="pct" id="gradientAnglePct"></span></div><div class="stack"><label><input type="checkbox" id="gradientSpinToggle">Enable Spinning</label><div class="slider-row" id="gradientSpinControls" style="display:none;"><label for="gradientSpinSpeed">Speed</label><input type="range" id="gradientSpinSpeed" min="1" max="100" value="10"><span class="pct" id="gradientSpinSpeedPct"></span></div></div></div></div><div class="hr"></div><div class="stack"><label><input type="checkbox" id="enableAmbiance">Enable Live Effects</label><div id="ambianceSettings" class="stack" style="display:none; margin-top: 10px;"><select id="ambianceSelect"><option value="none" selected>None</option><option value="snowflakes">Snowflakes</option><option value="orbs">Orbs</option><option value="starfield">Starfield</option></select><div id="ambianceControls" class="stack" style="display:none; border:1px solid var(--border); border-radius:8px; padding:10px; gap: 10px;"><div id="snowControls" class="stack" style="display:none;"><div class="slider-row"><label>Density</label><input type="range" id="snowDensity" min="0" max="300" value="100"><span class="pct" id="snowDensityPct"></span></div><div class="slider-row"><label>Size</label><input type="range" id="snowSize" min="10" max="40" value="20"><span class="pct" id="snowSizePct"></span></div><div class="slider-row"><label>Speed</label><input type="range" id="snowSpeed" min="10" max="100" value="30"><span class="pct" id="snowSpeedPct"></span></div></div><div id="orbsControls" class="stack" style="display:none;"><div class="slider-row"><label>Density</label><input type="range" id="orbsDensity" min="10" max="150" value="40"><span class="pct" id="orbsDensityPct"></span></div><div class="slider-row"><label>Size</label><input type="range" id="orbsSize" min="20" max="150" value="70"><span class="pct" id="orbsSizePct"></span></div><div class="slider-row"><label>Speed</label><input type="range" id="orbsSpeed" min="5" max="100" value="20"><span class="pct" id="orbsSpeedPct"></span></div><label>Color: <input type="color" id="orbsColor" value="#9aa4b2"></label></div><div id="starfieldControls" class="stack" style="display:none;"><div class="slider-row"><label>Density</label><input type="range" id="starfieldDensity" min="50" max="1500" value="500"><span class="pct" id="starfieldDensityPct"></span></div><div class="slider-row"><label>Speed</label><input type="range" id="starfieldSpeed" min="1" max="100" value="25"><span class="pct" id="starfieldSpeedPct"></span></div></div></div></div></div></div></details></div>
+          <div class="sub-section"><details><summary>Background</summary><div class="content"><div class="stack"><label><input type="checkbox" id="enableCustomBackground">Enable Custom Background</label></div><div id="customBackgroundOptions" class="stack" style="display:none;"><div class="hr"></div><div class="stack"><label for="backgroundType">Type</label><select id="backgroundType"><option value="theme" selected>Theme</option><option value="image">Image</option><option value="color">Gradient</option></select></div><div id="imageWallpaperControls" style="display:none; margin-top: 10px;"><input type="file" id="wallpaperFile" accept="image/*" /></div><div id="colorWallpaperControls" class="stack" style="display:none; margin-top: 10px;"><label>Start Color: <input type="color" id="wallpaperColor3" value="#1e1b4b"></label><label>End Color: <input type="color" id="wallpaperColor2" value="#4c1d95"></label><div class="slider-row"><label for="gradientAngle">Angle</label><input type="range" id="gradientAngle" min="0" max="360" value="145"><span class="pct" id="gradientAnglePct"></span></div><div class="stack"><label><input type="checkbox" id="gradientSpinToggle">Enable Spinning</label><div class="slider-row" id="gradientSpinControls" style="display:none;"><label for="gradientSpinSpeed">Speed</label><input type="range" id="gradientSpinSpeed" min="1" max="100" value="10"><span class="pct" id="gradientSpinSpeedPct"></span></div></div></div></div><div class="hr"></div><div class="stack"><label><input type="checkbox" id="enableAmbiance">Enable Live Effects</label><div id="ambianceSettings" class="stack" style="display:none; margin-top: 10px;"><select id="ambianceSelect"><option value="none" selected>None</option><option value="snowflakes">Snowflakes</option><option value="orbs">Orbs</option><option value="starfield">Starfield</option></select><div id="ambianceControls" class="stack" style="display:none; border:1px solid var(--border); border-radius:8px; padding:10px; gap: 10px;"><div id="snowControls" class="stack" style="display:none;"><div class="slider-row"><label>Density</label><input type="range" id="snowDensity" min="0" max="300" value="100"><span class="pct" id="snowDensityPct"></span></div><div class="slider-row"><label>Size</label><input type="range" id="snowSize" min="10" max="40" value="20"><span class="pct" id="snowSizePct"></span></div><div class="slider-row"><label>Speed</label><input type="range" id="snowSpeed" min="10" max="100" value="30"><span class="pct" id="snowSpeedPct"></span></div></div><div id="orbsControls" class="stack" style="display:none;"><div class="slider-row"><label>Density</label><input type="range" id="orbsDensity" min="10" max="150" value="40"><span class="pct" id="orbsDensityPct"></span></div><div class="slider-row"><label>Size</label><input type="range" id="orbsSize" min="20" max="150" value="70"><span class="pct" id="orbsSizePct"></span></div><div class="slider-row"><label>Speed</label><input type="range" id="orbsSpeed" min="5" max="100" value="20"><span class="pct" id="orbsSpeedPct"></span></div><label>Color: <input type="color" id="orbsColor" value="#9aa4b2"></label></div><div id="starfieldControls" class="stack" style="display:none;"><div class="slider-row"><label>Density</label><input type="range" id="starfieldDensity" min="50" max="1500" value="500"><span class="pct" id="starfieldDensityPct"></span></div><div class="slider-row"><label>Speed</label><input type="range" id="starfieldSpeed" min="1" max="100" value="25"><span class="pct" id="starfieldSpeedPct"></span></div></div></div></div></div></div></details></div>
     </div></details></div>
     <div class="section"><details><summary>Utility</summary><div class="content"><div class="stack"><label><input type="checkbox" id="enableClock"> Enable Clock</label><div id="clockOptionsWrapper" class="stack" style="display:none;"><label for="clockPosition">Position</label><select id="clockPosition"><option value="pos-top-left">Top Left</option><option value="pos-top-center">Top Center</option><option value="pos-top-right" selected>Top Right</option><option value="pos-bottom-left">Bottom Left</option><option value="pos-bottom-center">Bottom Center</option><option value="pos-bottom-right">Bottom Right</option></select><label for="clockDetail">Detail Level</label><select id="clockDetail"><option value="time">Time</option><option value="timeSec">Time w/ Seconds</option><option value="dateTime" selected>Date & Time</option></select></div></div><div class="hr"></div><div class="sub-section"><details><summary>Experimental</summary><div class="content"><label><input type="checkbox" id="enableSplitBillMode"> Enable Split Bill Mode</label><p style="font-size:12px;color:var(--muted);margin:4px 0 0;">Adds options to split a bill with another person.</p></div></details></div></div></details></div>
     <div class="menu-notch"><button id="closeMenuNotch">Close</button></div>
@@ -313,7 +313,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     const addBillForm = document.querySelector('.add-bill-form');
     const splitBillInputs = $('splitBillInputs');
     const addBtn = $('addBtn'), noBillsMessage = $('noBillsMessage'), noPastBillsMessage = $('noPastBillsMessage'), darkToggle = $('darkToggle'), menuBtn = $('menuBtn'), menuPanel = $('menuPanel'), closeMenuNotch = $('closeMenuNotch');
-    const totalAmountEl = $('totalAmount'), unpaidAmountEl = $('unpaidAmount'), paidAmountEl = $('paidAmount');
+    const totalAmountEl = $('totalAmount'), totalDueNext10DaysEl = $('totalDueNext10Days'), yourShareNext10DaysEl = $('yourShareNext10Days');
     const upcomingBillsList = $('upcomingBillsList'), next30DaysList = $('next30DaysList');
     const currentBalance = $('currentBalance'), paycheckAmount = $('paycheckAmount'), nextPayday = $('nextPayday'), payFrequency = $('payFrequency');
     const expenseForm = $('expenseForm');
@@ -347,15 +347,30 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     // --- DATA & STATE ---
     function saveData() {
         try {
-            localStorage.setItem('coinMaster.bills', JSON.stringify(bills));
+            localStorage.setItem('quarterMonkey.bills', JSON.stringify(bills));
             const settings = { darkMode: document.documentElement.classList.contains('dark'), splitBillMode: enableSplitBillMode.checked, finances: { balance: currentBalance.value, paycheck: paycheckAmount.value, payday: nextPayday.value, frequency: payFrequency.value }, clock: { enabled: enableClock.checked, position: clockPosition.value, detail: clockDetail.value }, naturalSlide: { enabled: enableNaturalSlide.checked, speed: slideSpeed.value }, uiStyle: uiStyleSelect.value, glassOpacity: glassOpacity.value, glassBlur: glassBlurSlider.value, customBg: enableCustomBackground.checked, bgType: backgroundType.value, bgColor2: wallpaperColor2.value, bgColor3: wallpaperColor3.value, bgGradientAngle: gradientAngle.value, bgGradientSpin: gradientSpinToggle.checked, bgGradientSpinSpeed: gradientSpinSpeed.value, ambiance: enableAmbiance.checked, ambianceEffect: ambianceSelect.value, snowDensity: snowDensity.value, snowSize: snowSize.value, snowSpeed: snowSpeed.value, orbsDensity: orbsDensity.value, orbsSize: orbsSize.value, orbsSpeed: orbsSpeed.value, orbsColor: orbsColor.value, starfieldDensity: starfieldDensity.value, starfieldSpeed: starfieldSpeed.value };
-            localStorage.setItem('coinMaster.settings', JSON.stringify(settings));
+            localStorage.setItem('quarterMonkey.settings', JSON.stringify(settings));
         } catch (error) { console.error("Failed to save data:", error); }
     }
     function loadData() {
         try {
-            bills = JSON.parse(localStorage.getItem('coinMaster.bills') || '[]');
-            const settingsData = localStorage.getItem('coinMaster.settings');
+            // Migration from 'coinMaster' to 'quarterMonkey'
+            if (localStorage.getItem('coinMaster.bills')) {
+                const oldBills = localStorage.getItem('coinMaster.bills');
+                const oldSettings = localStorage.getItem('coinMaster.settings');
+                const oldWallpaper = localStorage.getItem('coinMaster.wallpaper');
+
+                localStorage.setItem('quarterMonkey.bills', oldBills);
+                if (oldSettings) { localStorage.setItem('quarterMonkey.settings', oldSettings); }
+                if (oldWallpaper) { localStorage.setItem('quarterMonkey.wallpaper', oldWallpaper); }
+
+                localStorage.removeItem('coinMaster.bills');
+                localStorage.removeItem('coinMaster.settings');
+                localStorage.removeItem('coinMaster.wallpaper');
+            }
+
+            bills = JSON.parse(localStorage.getItem('quarterMonkey.bills') || '[]');
+            const settingsData = localStorage.getItem('quarterMonkey.settings');
             const settings = settingsData ? JSON.parse(settingsData) : {};
             if (settings.darkMode) { document.documentElement.classList.add('dark'); darkToggle.innerHTML = '☀️'; } else { darkToggle.innerHTML = '🌙';}
             enableSplitBillMode.checked = settings.splitBillMode || false;
@@ -369,7 +384,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
             uiStyleSelect.value = settings.uiStyle || 'twilight';
             glassOpacity.value = settings.glassOpacity || 80; glassBlurSlider.value = settings.glassBlur || 8;
             enableCustomBackground.checked = settings.customBg || false; backgroundType.value = settings.bgType || 'theme';
-            wallpaperColor2.value = settings.bgColor2 || '#4c1d95'; wallpaperColor3.value = settings.bgColor3 || '#1e1b4b';
+            wallpaperColor2.value = settings.bgColor2 || '#1e1b4b'; wallpaperColor3.value = settings.bgColor3 || '#4c1d95';
             gradientAngle.value = settings.bgGradientAngle || 145; gradientSpinToggle.checked = settings.bgGradientSpin || false; gradientSpinSpeed.value = settings.bgGradientSpinSpeed || '10';
             enableAmbiance.checked = settings.ambiance || false; ambianceSelect.value = settings.ambianceEffect || 'none';
             // ... ambiance settings load ...
@@ -581,22 +596,30 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         });
     }
     function updateSummary() {
-        const unpaidTotal = bills.filter(b => !b.paid).reduce((sum, bill) => sum + getUserShare(bill), 0);
-        const paidTotal = bills.filter(b => b.paid).reduce((sum, bill) => sum + getUserShare(bill), 0);
         const balance = parseFloat(currentBalance.value) || 0;
-        
         totalAmountEl.textContent = formatCurrency(balance);
-        unpaidAmountEl.textContent = formatCurrency(unpaidTotal);
-        paidAmountEl.textContent = formatCurrency(paidTotal);
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tenDaysFromNow = new Date();
+        tenDaysFromNow.setDate(today.getDate() + 10);
+
+        const dueInNext10Days = bills.filter(b => {
+            const billDate = new Date(b.date + 'T00:00:00');
+            return !b.paid && billDate >= today && billDate <= tenDaysFromNow;
+        });
+
+        const totalDue = dueInNext10Days.reduce((sum, bill) => sum + bill.amount, 0);
+        const yourShare = dueInNext10Days.reduce((sum, bill) => sum + getUserShare(bill), 0);
+
+        totalDueNext10DaysEl.textContent = formatCurrency(totalDue);
+        yourShareNext10DaysEl.textContent = formatCurrency(yourShare);
     }
     
     // --- FEATURES & CLOCK ---
     function syncExperimentalFeatures() {
         const isEnabled = enableSplitBillMode.checked;
         splitBillInputs.style.display = isEnabled ? 'grid' : 'none';
-        // Note: totalAmountLabel is now always "Current Balance"
-        $('unpaidAmountLabel').textContent = isEnabled ? 'Unpaid (Your Share)' : 'Unpaid';
-        $('paidAmountLabel').textContent = isEnabled ? 'Paid (Your Share)' : 'Paid';
         $('amountColumnHeader').textContent = isEnabled ? 'Amount (Your Share)' : 'Amount';
         renderApp(true);
     }
@@ -723,10 +746,10 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         $('colorWallpaperControls').style.display = type === 'color' ? 'block' : 'none';
 
         if (type === 'image') {
-            const wallpaper = localStorage.getItem('coinMaster.wallpaper');
+            const wallpaper = localStorage.getItem('quarterMonkey.wallpaper');
             document.body.style.backgroundImage = wallpaper ? `url(${wallpaper})` : '';
         } else if (type === 'color') {
-            document.body.style.backgroundImage = `linear-gradient(${gradientAngle.value}deg, ${wallpaperColor2.value}, ${wallpaperColor3.value})`;
+            document.body.style.backgroundImage = `linear-gradient(${gradientAngle.value}deg, ${wallpaperColor3.value}, ${wallpaperColor2.value})`;
         } else {
             document.body.style.backgroundImage = '';
         }
@@ -737,7 +760,106 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     };
     function animateEnter(tr){ if(!enableNaturalSlide.checked) return; tr.classList.add('slide-enter'); requestAnimationFrame(() => { tr.classList.add('slide-enter-active'); setTimeout(() => tr.classList.remove('slide-enter','slide-enter-active'), slideSpeed.value); }); }
     function animateRemove(tr, callback){ if(!enableNaturalSlide.checked){ tr.remove(); callback(); return; } tr.style.height = `${tr.offsetHeight}px`; tr.classList.add('slide-out'); requestAnimationFrame(() => { tr.classList.add('collapsing'); }); setTimeout(() => { if(tr.parentNode) { tr.remove(); } callback(); }, slideSpeed.value); }
-    function applyAmbianceSettings() { /* A full implementation is complex, so this is a placeholder to show it's considered */ ambianceSettings.style.display = enableAmbiance.checked ? 'block' : 'none'; }
+
+    function applyAmbianceSettings() {
+        ambianceSettings.style.display = enableAmbiance.checked ? 'block' : 'none';
+        ambianceControls.style.display = enableAmbiance.checked && ambianceSelect.value !== 'none' ? 'block' : 'none';
+        ['snowControls', 'orbsControls', 'starfieldControls'].forEach(c => $(c).style.display = 'none');
+
+        ambianceParticles = []; // Clear existing particles
+        ctxAmbiance.clearRect(0, 0, ambianceCanvas.width, ambianceCanvas.height);
+
+        if (enableAmbiance.checked) {
+            const effect = ambianceSelect.value;
+            if (effect === 'none') return;
+
+            $(effect + 'Controls').style.display = 'block';
+            let density = 100;
+            if (effect === 'snowflakes') density = snowDensity.value;
+            else if (effect === 'orbs') density = orbsDensity.value;
+            else if (effect === 'starfield') density = starfieldDensity.value;
+
+            for (let i = 0; i < density; i++) {
+                if (effect === 'snowflakes') ambianceParticles.push(createSnowflake(true));
+                else if (effect === 'orbs') ambianceParticles.push(createOrb(true));
+                else if (effect === 'starfield') ambianceParticles.push(createStar(true));
+            }
+        }
+    }
+
+    function createSnowflake(isInitial = false) {
+        const size = (Math.random() * (snowSize.value / 10) + 1);
+        return {
+            x: Math.random() * ambianceCanvas.width,
+            y: isInitial ? Math.random() * ambianceCanvas.height : -size,
+            size: size,
+            speed: (Math.random() * (snowSpeed.value / 20) + 0.5),
+            opacity: Math.random() * 0.5 + 0.3,
+            update: function() { this.y += this.speed; this.x += Math.sin(this.y/50)*0.5; },
+            draw: function() { ctxAmbiance.fillStyle = `rgba(255, 255, 255, ${this.opacity})`; ctxAmbiance.beginPath(); ctxAmbiance.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctxAmbiance.fill(); },
+            isOutOfBounds: function() { return this.y > ambianceCanvas.height + this.size; }
+        };
+    }
+
+    function createOrb(isInitial = false) {
+        const size = Math.random() * (orbsSize.value / 10) + 5;
+        return {
+            x: Math.random() * ambianceCanvas.width,
+            y: isInitial ? Math.random() * ambianceCanvas.height : ambianceCanvas.height + size,
+            size: size,
+            speed: (Math.random() * (orbsSpeed.value / 20) + 0.1),
+            color: orbsColor.value,
+            update: function() { this.y -= this.speed; },
+            draw: function() { ctxAmbiance.fillStyle = this.color; ctxAmbiance.globalAlpha = 0.5; ctxAmbiance.beginPath(); ctxAmbiance.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctxAmbiance.fill(); ctxAmbiance.globalAlpha = 1; },
+            isOutOfBounds: function() { return this.y < -this.size; }
+        };
+    }
+
+    function createStar(isInitial = false) {
+        return {
+            x: Math.random() * ambianceCanvas.width,
+            y: isInitial ? Math.random() * ambianceCanvas.height: 0,
+            size: Math.random() * 1.5 + 0.5,
+            speed: (Math.random() * (starfieldSpeed.value / 10) + 0.1),
+            update: function() { this.y += this.speed; if (this.y > ambianceCanvas.height) {this.y = 0; this.x = Math.random() * ambianceCanvas.width;} },
+            draw: function() { ctxAmbiance.fillStyle = 'rgba(255, 255, 255, 0.8)'; ctxAmbiance.fillRect(this.x, this.y, this.size, this.size); },
+            isOutOfBounds: function() { return false; /* handled in update */ }
+        };
+    }
+
+    function mainLoop() {
+        if (gradientSpinToggle.checked && enableCustomBackground.checked && backgroundType.value === 'color') {
+            const currentAngle = parseFloat(gradientAngle.value);
+            gradientAnimationAngle = (gradientAnimationAngle + (parseFloat(gradientSpinSpeed.value) / 20)) % 360;
+            document.body.style.backgroundImage = `linear-gradient(${currentAngle + gradientAnimationAngle}deg, ${wallpaperColor3.value}, ${wallpaperColor2.value})`;
+        }
+
+        if (enableAmbiance.checked && ambianceSelect.value !== 'none') {
+            ctxAmbiance.clearRect(0, 0, ambianceCanvas.width, ambianceCanvas.height);
+            ambianceParticles.forEach((p, index) => {
+                p.update();
+                p.draw();
+                if (p.isOutOfBounds()) ambianceParticles.splice(index, 1);
+            });
+
+            const effect = ambianceSelect.value;
+            let targetDensity = 0;
+            if (effect === 'snowflakes') targetDensity = snowDensity.value;
+            else if (effect === 'orbs') targetDensity = orbsDensity.value;
+            else if (effect === 'starfield') targetDensity = starfieldDensity.value;
+
+            if (ambianceParticles.length < targetDensity) {
+                 if (effect === 'snowflakes') ambianceParticles.push(createSnowflake());
+                 else if (effect === 'orbs') ambianceParticles.push(createOrb());
+                 // Stars replenish themselves
+            }
+        } else if (ambianceParticles.length > 0) {
+            ambianceParticles = [];
+            ctxAmbiance.clearRect(0, 0, ambianceCanvas.width, ambianceCanvas.height);
+        }
+
+        requestAnimationFrame(mainLoop);
+    }
 
     // --- EVENT HANDLERS ---
     const handleAddBill = () => {
@@ -751,11 +873,60 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         bills.push(newBill); addBillForm.reset(); $('billDate').value = new Date().toISOString().split('T')[0];
         saveData(); renderApp();
     };
-    const handleAddExpense = (e) => { e.preventDefault(); const desc = $('expenseDescription').value.trim(), amount = parseFloat($('expenseAmount').value); if(desc && amount > 0) { const newExpenseAsBill = { id: Date.now(), name: desc, amount: amount, date: new Date().toISOString().split('T')[0], category: 'Expense', frequency: 'One-Time', notes: 'Logged as a one-time expense.', paid: true, isSplit: false, justAdded: true }; bills.push(newExpenseAsBill); saveData(); renderApp(); expenseForm.reset(); }};
-    const handleListClick = (e) => { const tr = e.target.closest('tr'); if (!tr) return; const target = e.target; if (target.matches('.pay-btn, .unpay-btn, .remove-btn')) { const billId = Number(tr.dataset.id); const bill = bills.find(b => b.id === billId); if (target.matches('.pay-btn, .unpay-btn')) { bill.paid = !bill.paid; saveData(); renderApp(true); } if (target.matches('.remove-btn')) { if (confirm(`Delete bill: "${bill.name}"?`)) { animateRemove(tr, () => { bills = bills.filter(b => b.id !== billId); saveData(); updateSummary(); renderUpcomingBills(); renderNext30Days(); }); } } }};
+    const handleAddExpense = (e) => {
+        e.preventDefault();
+        const desc = $('expenseDescription').value.trim(),
+            amount = parseFloat($('expenseAmount').value);
+        if (desc && amount > 0) {
+            const newExpenseAsBill = {
+                id: Date.now(), name: desc, amount: amount,
+                date: new Date().toISOString().split('T')[0], category: 'Expense',
+                frequency: 'One-Time', notes: 'Logged as a one-time expense.',
+                paid: true, isSplit: false, justAdded: true
+            };
+            bills.push(newExpenseAsBill);
+            const currentBalanceVal = parseFloat(currentBalance.value) || 0;
+            currentBalance.value = (currentBalanceVal - amount).toFixed(2);
+            saveData();
+            renderApp();
+            expenseForm.reset();
+        }
+    };
+    const handleListClick = (e) => {
+        const tr = e.target.closest('tr'); if (!tr) return;
+        const target = e.target;
+        if (target.matches('.pay-btn, .unpay-btn, .remove-btn')) {
+            const billId = Number(tr.dataset.id);
+            const bill = bills.find(b => b.id === billId);
+            if (target.matches('.pay-btn, .unpay-btn')) {
+                const wasPaid = bill.paid;
+                bill.paid = !bill.paid;
+                const share = getUserShare(bill);
+                const currentBalanceVal = parseFloat(currentBalance.value) || 0;
+                if (bill.paid && !wasPaid) {
+                    currentBalance.value = (currentBalanceVal - share).toFixed(2);
+                } else if (!bill.paid && wasPaid) {
+                    currentBalance.value = (currentBalanceVal + share).toFixed(2);
+                }
+                saveData();
+                renderApp(true);
+            }
+            if (target.matches('.remove-btn')) {
+                if (confirm(`Delete bill: "${bill.name}"?`)) {
+                    animateRemove(tr, () => {
+                        bills = bills.filter(b => b.id !== billId);
+                        saveData();
+                        updateSummary();
+                        renderUpcomingBills();
+                        renderNext30Days();
+                    });
+                }
+            }
+        }
+    };
     const handleListDoubleClick = (e) => { const tr = e.target.closest('tr[data-id]'); if (tr && !e.target.closest('.actions-cell')) openEditModal(Number(tr.dataset.id)); };
     const handleToggleDarkMode = () => { document.documentElement.classList.toggle('dark'); const isDark = document.documentElement.classList.contains('dark'); darkToggle.innerHTML = isDark ? '☀️' : '🌙'; applyMaterialStyle(); saveData(); };
-    const handleWallpaperFile = (e) => { const file = e.target.files[0]; if (file && file.size < 5*1024*1024) { const reader = new FileReader(); reader.onload = (e) => { localStorage.setItem('coinMaster.wallpaper', e.target.result); updateWallpaper(); saveData(); }; reader.readAsDataURL(file); } else if (file) alert('Image too large (max 5MB).'); };
+    const handleWallpaperFile = (e) => { const file = e.target.files[0]; if (file && file.size < 5*1024*1024) { const reader = new FileReader(); reader.onload = (e) => { localStorage.setItem('quarterMonkey.wallpaper', e.target.result); updateWallpaper(); saveData(); }; reader.readAsDataURL(file); } else if (file) alert('Image too large (max 5MB).'); };
     const handleCalendarNav = (e) => { if(e.target.id === 'prevMonthBtn') calendarDate.setMonth(calendarDate.getMonth() - 1); if(e.target.id === 'nextMonthBtn') calendarDate.setMonth(calendarDate.getMonth() + 1); renderCalendar(); };
     
     // --- EVENT LISTENERS ---
