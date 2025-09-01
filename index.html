@@ -54,9 +54,27 @@ body {
 .card { border-radius:16px; width:100%; overflow:hidden; padding-bottom:10px; }
 h2, h3 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 600; }
 .card h2 { padding: 0 4px; }
-.card-header { display: flex; justify-content: space-between; align-items: center; margin: -4px -4px 12px; }
+.card-header { display: flex; justify-content: flex-end; align-items: center; margin: -4px -4px 12px; }
 .card-header h2 { padding: 0; }
-.add-bill-header-btn { background: var(--accent); color: white; border: none; padding: 8px 14px; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
+.add-bill-header-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color .2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    height: 38px;
+    width: auto;
+    padding: 0 24px;
+    border-radius: 999px;
+    position: relative;
+    z-index: 10;
+    margin: -20px 0;
+}
 .add-bill-header-btn:hover { background: color-mix(in srgb, var(--accent) 90%, black); }
 .link-button { background: transparent; border: none; color: var(--accent); cursor: pointer; font-size: 14px; padding: 8px; font-weight: 600; }
 .link-button:hover { text-decoration: underline; }
@@ -389,31 +407,19 @@ tr.paid .unpay-btn {
     </div>
 
     <main id="billTrackerCard" class="card glass" role="main">
-      <div class="card-header">
-        <h2>Current Bills</h2>
-        <button id="addBillBtnHeader" class="add-bill-header-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 5px;"><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z"></path></svg>Add Bill</button>
-      </div>
-      <details id="addBillSection">
-        <summary style="display:none;"></summary>
-        <form class="add-bill-form" id="addBillForm">
-            <input id="billName" type="text" placeholder="Bill Name (e.g., Netflix)" required />
-            <input id="billAmount" type="number" placeholder="Total Amount ($)" step="0.01" min="0" />
-            <input id="billDate" type="date" required />
-            <select id="billFrequency"><option>One-Time</option><option selected>Monthly</option><option>Quarterly</option><option>Annually</option></select>
-            <select id="billCategory"><option>Utilities</option><option>Subscription</option><option>Rent/Mortgage</option><option>Loan</option><option>Insurance</option><option>Groceries</option><option>Personal</option><option>Other</option><option value="Expense">Expense</option></select>
-            <input id="billNotes" type="text" placeholder="Notes (optional)" />
-            <div id="splitBillInputs"><input type="text" id="billSplitName" placeholder="Split with (Name)"><input type="number" id="billSplitAmount" placeholder="Their Share ($)"></div>
-            <button id="addBtn" type="button">Add Bill</button>
-        </form>
-      </details>
       <div class="bill-table-wrapper">
         <table class="bill-table" id="billList">
-            <thead><tr><th>Due Date</th><th>Bill Details</th><th>Notes</th><th id="amountColumnHeader">Amount</th><th style="text-align: right;">Actions</th></tr></thead>
             <tbody id="billListBody"></tbody>
         </table>
         <div class="no-bills-message" id="noBillsMessage"><p>No upcoming bills. Add one to get started! 💸</p></div>
       </div>
     </main>
+
+    <div style="text-align: center;">
+        <button id="addBillBtnHeader" class="add-bill-header-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z"></path></svg>Add Bill
+        </button>
+    </div>
 
     <details id="pastBillsCard" class="card glass">
         <summary>Past Bills</summary>
@@ -462,6 +468,25 @@ tr.paid .unpay-btn {
     </div>
   </div>
 
+  <div id="addBillModal" class="modal-overlay">
+    <div class="modal-content glass">
+      <h2>Add New Bill</h2>
+      <form class="add-bill-form" id="addBillForm" style="border-bottom: none; padding-bottom: 0;">
+          <input id="billName" type="text" placeholder="Bill Name (e.g., Netflix)" required class="full-width" />
+          <input id="billAmount" type="number" placeholder="Total Amount ($)" step="0.01" min="0" />
+          <input id="billDate" type="date" required />
+          <select id="billFrequency"><option>One-Time</option><option selected>Monthly</option><option>Quarterly</option><option>Annually</option></select>
+          <select id="billCategory"><option>Utilities</option><option>Subscription</option><option>Rent/Mortgage</option><option>Loan</option><option>Insurance</option><option>Groceries</option><option>Personal</option><option>Other</option><option value="Expense">Expense</option></select>
+          <input id="billNotes" type="text" placeholder="Notes (optional)" class="full-width" />
+          <div id="splitBillInputs" class="full-width"><input type="text" id="billSplitName" placeholder="Split with (Name)"><input type="number" id="billSplitAmount" placeholder="Their Share ($)"></div>
+          <div class="modal-buttons full-width">
+            <button type="button" class="cancel-btn" id="closeAddBillModalBtn">Cancel</button>
+            <button id="addBtn" type="button" class="save-btn">Add Bill</button>
+          </div>
+      </form>
+    </div>
+  </div>
+
   <div class="menu-panel glass" id="menuPanel" aria-hidden="true">
     <div class="section"><details><summary>Appearance</summary>
         <div class="content">
@@ -492,6 +517,7 @@ tr.paid .unpay-btn {
     const currentBalance = $('currentBalance'), paycheckAmount = $('paycheckAmount'), nextPayday = $('nextPayday'), payFrequency = $('payFrequency');
     const expenseForm = $('expenseForm');
     const editModal = $('editModal'), closeModalBtn = $('closeModalBtn'), saveEditBtn = $('saveEditBtn');
+    const addBillModal = $('addBillModal'), closeAddBillModalBtn = $('closeAddBillModalBtn');
     const editSplitBillInputs = $('editSplitBillInputs');
     const addBillBtnHeader = $('addBillBtnHeader');
     const archiveView = $('archiveView'), appView = $('app'), archiveBtn = $('archiveBtn'), backFromArchiveBtn = $('backFromArchiveBtn');
@@ -975,7 +1001,7 @@ tr.paid .unpay-btn {
     function syncExperimentalFeatures() {
         const isEnabled = enableSplitBillMode.checked;
         splitBillInputs.style.display = isEnabled ? 'grid' : 'none';
-        $('amountColumnHeader').textContent = isEnabled ? 'Amount (Your Share)' : 'Amount';
+        // $('amountColumnHeader').textContent = isEnabled ? 'Amount (Your Share)' : 'Amount'; // This element was removed
         $('yourShareCard').style.display = isEnabled ? 'flex' : 'none';
         renderApp(true);
     }
@@ -1455,9 +1481,10 @@ tr.paid .unpay-btn {
     
     // --- EVENT LISTENERS ---
     addBillBtnHeader.addEventListener('click', () => {
-        const details = $('addBillSection');
-        details.open = !details.open;
-        if(details.open) details.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        addBillModal.classList.add('visible');
+    });
+    closeAddBillModalBtn.addEventListener('click', () => {
+        addBillModal.classList.remove('visible');
     });
     archiveBtn.addEventListener('click', () => {
         appView.style.display = 'none';
