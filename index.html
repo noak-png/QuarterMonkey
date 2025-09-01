@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>QuarterMonkey - Financial Forecaster</title>
+<title>Summit Forecast - Financial Forecaster</title>
 
 <style>
 /* ========== Base Theme Variables ========== */
@@ -338,7 +338,7 @@ tr.paid .unpay-btn {
   <canvas id="ambianceCanvas"></canvas>
   <div class="app" id="app">
     <header class="title-wrap glass">
-      <h1><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2ZM13,17H11V15H13V17ZM13,13H11V7H13V13Z" /></svg>QuarterMonkey</h1>
+      <h1><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2ZM13,17H11V15H13V17ZM13,13H11V7H13V13Z" /></svg>Summit Forecast</h1>
       <div class="header-controls">
         <button id="darkToggle" class="ctrl-btn dark-toggle" title="Toggle Dark Mode">🌙</button>
         <button id="calendarToggleBtn" class="ctrl-btn" title="Toggle Calendar View"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19,19H5V8H19M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M16.53,11.06L15.47,10L10.5,14.97L8.47,12.94L7.41,14L10.5,17.09L16.53,11.06Z"/></svg></button>
@@ -395,7 +395,7 @@ tr.paid .unpay-btn {
       </div>
       <details id="addBillSection">
         <summary style="display:none;"></summary>
-        <div class="add-bill-form">
+        <form class="add-bill-form" id="addBillForm">
             <input id="billName" type="text" placeholder="Bill Name (e.g., Netflix)" required />
             <input id="billAmount" type="number" placeholder="Total Amount ($)" step="0.01" min="0" />
             <input id="billDate" type="date" required />
@@ -403,8 +403,8 @@ tr.paid .unpay-btn {
             <select id="billCategory"><option>Utilities</option><option>Subscription</option><option>Rent/Mortgage</option><option>Loan</option><option>Insurance</option><option>Groceries</option><option>Personal</option><option>Other</option><option value="Expense">Expense</option></select>
             <input id="billNotes" type="text" placeholder="Notes (optional)" />
             <div id="splitBillInputs"><input type="text" id="billSplitName" placeholder="Split with (Name)"><input type="number" id="billSplitAmount" placeholder="Their Share ($)"></div>
-            <button id="addBtn">Add Bill</button>
-        </div>
+            <button id="addBtn" type="button">Add Bill</button>
+        </form>
       </details>
       <div class="bill-table-wrapper">
         <table class="bill-table" id="billList">
@@ -484,7 +484,7 @@ tr.paid .unpay-btn {
     let bills = [], userFinances = {}, currentView = 'list', calendarDate = new Date(), clockInterval = null;
     const $ = (s) => document.getElementById(s);
     const billTrackerCard = $('billTrackerCard'), pastBillsCard = $('pastBillsCard'), calendarView = $('calendarView'), calendarToggleBtn = $('calendarToggleBtn'), billListBody = $('billListBody'), pastBillsListBody = $('pastBillsListBody');
-    const addBillForm = document.querySelector('.add-bill-form');
+    const addBillForm = $('addBillForm');
     const splitBillInputs = $('splitBillInputs');
     const addBtn = $('addBtn'), noBillsMessage = $('noBillsMessage'), noPastBillsMessage = $('noPastBillsMessage'), darkToggle = $('darkToggle'), menuBtn = $('menuBtn'), menuPanel = $('menuPanel'), closeMenuNotch = $('closeMenuNotch');
     const totalAmountEl = $('totalAmount'), totalDueNext10DaysEl = $('totalDueNext10Days'), yourShareNext10DaysEl = $('yourShareNext10Days');
@@ -533,29 +533,31 @@ tr.paid .unpay-btn {
     // --- DATA & STATE ---
     function saveData() {
         try {
-            localStorage.setItem('quarterMonkey.bills', JSON.stringify(bills));
+            localStorage.setItem('summitForecast.bills', JSON.stringify(bills));
             const settings = { darkMode: document.documentElement.classList.contains('dark'), splitBillMode: enableSplitBillMode.checked, dontAutoDeduct: dontAutoDeduct.checked, finances: { balance: currentBalance.value, paycheck: paycheckAmount.value, payday: nextPayday.value, frequency: payFrequency.value }, clock: { enabled: enableClock.checked, position: clockPosition.value, detail: clockDetail.value }, naturalSlide: { enabled: enableNaturalSlide.checked, speed: slideSpeed.value }, uiStyle: uiStyleSelect.value, glassOpacity: glassOpacity.value, glassBlur: glassBlurSlider.value, customBg: enableCustomBackground.checked, bgType: backgroundType.value, bgColor2: wallpaperColor2.value, bgColor3: wallpaperColor3.value, bgGradientAngle: gradientAngle.value, bgGradientSpin: gradientSpinToggle.checked, bgGradientSpinSpeed: gradientSpinSpeed.value, ambiance: enableAmbiance.checked, ambianceEffect: ambianceSelect.value, snowDensity: snowDensity.value, snowSize: snowSize.value, snowSpeed: snowSpeed.value, orbsDensity: orbsDensity.value, orbsSize: orbsSize.value, orbsSpeed: orbsSpeed.value, orbsColor: orbsColor.value, starfieldDensity: starfieldDensity.value, starfieldSpeed: starfieldSpeed.value };
-            localStorage.setItem('quarterMonkey.settings', JSON.stringify(settings));
+            localStorage.setItem('summitForecast.settings', JSON.stringify(settings));
         } catch (error) { console.error("Failed to save data:", error); }
     }
     function loadData() {
         try {
-            // Migration from 'coinMaster' to 'quarterMonkey'
-            if (localStorage.getItem('coinMaster.bills')) {
-                const oldBills = localStorage.getItem('coinMaster.bills');
-                const oldSettings = localStorage.getItem('coinMaster.settings');
-                const oldWallpaper = localStorage.getItem('coinMaster.wallpaper');
-
-                localStorage.setItem('quarterMonkey.bills', oldBills);
-                if (oldSettings) { localStorage.setItem('quarterMonkey.settings', oldSettings); }
-                if (oldWallpaper) { localStorage.setItem('quarterMonkey.wallpaper', oldWallpaper); }
-
+            // Migration to 'summitForecast'
+            if (localStorage.getItem('quarterMonkey.bills')) {
+                localStorage.setItem('summitForecast.bills', localStorage.getItem('quarterMonkey.bills'));
+                if (localStorage.getItem('quarterMonkey.settings')) { localStorage.setItem('summitForecast.settings', localStorage.getItem('quarterMonkey.settings')); }
+                if (localStorage.getItem('quarterMonkey.wallpaper')) { localStorage.setItem('summitForecast.wallpaper', localStorage.getItem('quarterMonkey.wallpaper')); }
+                localStorage.removeItem('quarterMonkey.bills');
+                localStorage.removeItem('quarterMonkey.settings');
+                localStorage.removeItem('quarterMonkey.wallpaper');
+            } else if (localStorage.getItem('coinMaster.bills')) {
+                localStorage.setItem('summitForecast.bills', localStorage.getItem('coinMaster.bills'));
+                if (localStorage.getItem('coinMaster.settings')) { localStorage.setItem('summitForecast.settings', localStorage.getItem('coinMaster.settings')); }
+                if (localStorage.getItem('coinMaster.wallpaper')) { localStorage.setItem('summitForecast.wallpaper', localStorage.getItem('coinMaster.wallpaper')); }
                 localStorage.removeItem('coinMaster.bills');
                 localStorage.removeItem('coinMaster.settings');
                 localStorage.removeItem('coinMaster.wallpaper');
             }
 
-            bills = JSON.parse(localStorage.getItem('quarterMonkey.bills') || '[]');
+            bills = JSON.parse(localStorage.getItem('summitForecast.bills') || '[]');
             // --- MIGRATION FOR STATUS ---
             bills.forEach(bill => {
                 if (typeof bill.paid === 'boolean' && !bill.status) {
@@ -565,7 +567,7 @@ tr.paid .unpay-btn {
                     bill.status = 'unpaid';
                 }
             });
-            const settingsData = localStorage.getItem('quarterMonkey.settings');
+            const settingsData = localStorage.getItem('summitForecast.settings');
             const settings = settingsData ? JSON.parse(settingsData) : {};
             if (settings.darkMode) { document.documentElement.classList.add('dark'); darkToggle.innerHTML = '☀️'; } else { darkToggle.innerHTML = '🌙';}
             enableSplitBillMode.checked = settings.splitBillMode || false;
@@ -915,6 +917,12 @@ tr.paid .unpay-btn {
         const pendingTotal = bills.filter(b => b.status === 'pending').reduce((sum, bill) => sum + getUserShare(bill), 0);
         const balanceAfterPending = balance - pendingTotal;
 
+        // Fix for duplicate projected balance display
+        const projectedEl = totalAmountEl.parentNode.querySelector('.projected-balance');
+        if (projectedEl) {
+            projectedEl.remove();
+        }
+
         totalAmountEl.textContent = formatCurrency(balanceAfterPending);
         if (pendingTotal > 0) {
             const originalBalanceEl = document.createElement('div');
@@ -954,8 +962,8 @@ tr.paid .unpay-btn {
                 const projectedBalanceTotal = balanceAfterPending - totalDue + upcomingIncome;
                 const projectedBalanceShare = balanceAfterPending - yourShare + upcomingIncome;
                 
-                projectedTotalEl.textContent = `Balance after: ${formatCurrency(projectedBalanceTotal)}`;
-                projectedShareEl.textContent = `Balance after: ${formatCurrency(projectedBalanceShare)}`;
+                projectedTotalEl.textContent = `Balance after 10 days: ${formatCurrency(projectedBalanceTotal)}`;
+                projectedShareEl.textContent = `Balance after 10 days: ${formatCurrency(projectedBalanceShare)}`;
             } else {
                 projectedTotalEl.textContent = '';
                 projectedShareEl.textContent = '';
@@ -1141,7 +1149,7 @@ tr.paid .unpay-btn {
         gradientSpinControls.style.display = gradientSpinToggle.checked ? 'flex' : 'none';
 
         if (type === 'image') {
-            const wallpaper = localStorage.getItem('quarterMonkey.wallpaper');
+            const wallpaper = localStorage.getItem('summitForecast.wallpaper');
             document.body.style.backgroundImage = wallpaper ? `url(${wallpaper})` : '';
         } else if (type === 'color') {
             document.body.style.backgroundImage = `linear-gradient(${gradientAngle.value}deg, ${wallpaperColor3.value}, ${wallpaperColor2.value})`;
@@ -1355,7 +1363,7 @@ tr.paid .unpay-btn {
     };
     const handleListDoubleClick = (e) => { const tr = e.target.closest('tr[data-id]'); if (tr && !e.target.closest('.actions-cell')) openEditModal(Number(tr.dataset.id)); };
     const handleToggleDarkMode = () => { document.documentElement.classList.toggle('dark'); const isDark = document.documentElement.classList.contains('dark'); darkToggle.innerHTML = isDark ? '☀️' : '🌙'; applyMaterialStyle(); saveData(); };
-    const handleWallpaperFile = (e) => { const file = e.target.files[0]; if (file && file.size < 5*1024*1024) { const reader = new FileReader(); reader.onload = (e) => { localStorage.setItem('quarterMonkey.wallpaper', e.target.result); updateWallpaper(); saveData(); }; reader.readAsDataURL(file); } else if (file) alert('Image too large (max 5MB).'); };
+    const handleWallpaperFile = (e) => { const file = e.target.files[0]; if (file && file.size < 5*1024*1024) { const reader = new FileReader(); reader.onload = (e) => { localStorage.setItem('summitForecast.wallpaper', e.target.result); updateWallpaper(); saveData(); }; reader.readAsDataURL(file); } else if (file) alert('Image too large (max 5MB).'); };
     const handleCalendarNav = (e) => {
         const dayCell = e.target.closest('.calendar-day');
         if (dayCell && !dayCell.classList.contains('other-month')) {
@@ -1382,9 +1390,9 @@ tr.paid .unpay-btn {
 
     function handleExportProfile() {
         try {
-            const bills = localStorage.getItem('quarterMonkey.bills') || '[]';
-            const settings = localStorage.getItem('quarterMonkey.settings') || '{}';
-            const wallpaper = localStorage.getItem('quarterMonkey.wallpaper') || null;
+            const bills = localStorage.getItem('summitForecast.bills') || '[]';
+            const settings = localStorage.getItem('summitForecast.settings') || '{}';
+            const wallpaper = localStorage.getItem('summitForecast.wallpaper') || null;
 
             const profileData = {
                 bills: JSON.parse(bills),
@@ -1397,7 +1405,7 @@ tr.paid .unpay-btn {
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             link.setAttribute("href", url);
-            link.setAttribute("download", "QuarterMonkey_Profile.json");
+            link.setAttribute("download", "SummitForecast_Profile.json");
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
@@ -1421,19 +1429,19 @@ tr.paid .unpay-btn {
                 try {
                     const profileData = JSON.parse(event.target.result);
                     if (profileData && profileData.bills && profileData.settings) {
-                        localStorage.setItem('quarterMonkey.bills', JSON.stringify(profileData.bills));
-                        localStorage.setItem('quarterMonkey.settings', JSON.stringify(profileData.settings));
+                        localStorage.setItem('summitForecast.bills', JSON.stringify(profileData.bills));
+                        localStorage.setItem('summitForecast.settings', JSON.stringify(profileData.settings));
                         
                         if (profileData.wallpaper) {
-                            localStorage.setItem('quarterMonkey.wallpaper', profileData.wallpaper);
+                            localStorage.setItem('summitForecast.wallpaper', profileData.wallpaper);
                         } else {
-                            localStorage.removeItem('quarterMonkey.wallpaper');
+                            localStorage.removeItem('summitForecast.wallpaper');
                         }
 
                         alert('Profile imported successfully! The application will now reload.');
                         location.reload();
                     } else {
-                        alert('Invalid profile file. Please select a valid QuarterMonkey profile.');
+                        alert('Invalid profile file. Please select a valid Summit Forecast profile.');
                     }
                 } catch (error) {
                     console.error("Failed to import profile:", error);
