@@ -106,6 +106,27 @@ h2, h3 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 60
 }
 .link-button { background: transparent; border: none; color: var(--accent); cursor: pointer; font-size: 14px; padding: 8px; font-weight: 600; }
 .link-button:hover { text-decoration: underline; }
+
+.card-footer {
+    display: none;
+    padding: 10px 0 0 0;
+    text-align: left;
+}
+.btn-success {
+    background-color: var(--ok);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: calc(var(--border-radius) / 1.5);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.btn-success:hover {
+    background-color: color-mix(in srgb, var(--ok) 90%, black);
+}
+
 .summary-card .amount { font-size: 36px; font-weight: 700; line-height: 1.1; }
 .summary-card .projected-balance { font-size: 12px; color: var(--muted); margin-top: 4px; height: 1.2em; font-weight: 600; }
 .summary-card .amount.paid { color: var(--ok); } .summary-card .amount.unpaid { color: var(--danger); } .summary-card .amount.total { color: var(--accent); }
@@ -475,9 +496,8 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         padding-bottom: 10px;
         display: list-item;
     }
-    .mobile-view #pastBillsCard .card-footer {
-        text-align: left;
-        padding-left: calc(10% + 16px);
+    .mobile-view #pastBillsCard[open] .card-footer {
+        display: block;
     }
     .mobile-view .bill-table-wrapper {
       padding-right: 0;
@@ -807,13 +827,16 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     </div>
 
     <details id="pastBillsCard" class="card glass">
-        <summary>Past Bills<button id="archiveBtn" class="link-button">View Full Archive</button></summary>
+        <summary>Past Bills</summary>
         <div class="bill-table-wrapper">
             <table class="bill-table" id="pastBillsTable">
                 <thead><tr><th>Due Date</th><th>Bill Details</th><th>Notes</th><th>Amount</th><th style="text-align: right;">Actions</th></tr></thead>
                 <tbody id="pastBillsListBody"></tbody>
             </table>
              <div class="no-bills-message" id="noPastBillsMessage" style="display: none;"><p>No paid bills yet.</p></div>
+        </div>
+        <div class="card-footer">
+            <button id="archiveBtn" class="btn-success">View Full Archive</button>
         </div>
     </details>
 
