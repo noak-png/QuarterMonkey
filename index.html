@@ -246,7 +246,20 @@ tr.paid .unpay-btn { display: inline-block; }
 }
 
 /* ========== The Tab Feature ========== */
-#theTabCard h2 { text-align: left; padding: 0 4px; }
+#theTabCard > summary {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 600;
+    margin: -16px -16px 10px;
+    padding: 16px;
+    padding-bottom: 10px;
+    list-style: none;
+    cursor: pointer;
+    background: rgba(128,128,128,0.05);
+}
+#theTabCard > summary::-webkit-details-marker {
+    display: none;
+}
 .debt-content-wrapper { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; flex-grow: 1; }
 .debt-list { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px; }
 .debt-item { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 10px; background: rgba(128,128,128,0.05); border-radius: calc(var(--border-radius) / 2); border-left: 3px solid var(--accent); }
@@ -375,7 +388,6 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     main#billTrackerCard { max-height: none; flex: initial; }
     .menu-panel{ right:8px; left:8px; width:auto; top:70px; }
     .calendar-day { min-height: 80px; }
-    #theTabRow { display: none !important; }
 }
 
 /* ========== MOBILE MODE STYLES ========== */
@@ -426,9 +438,19 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     .mobile-view #financeCard { order: 3; }
 
     /* Make Finance card collapsible on mobile */
-    .mobile-view details.finance-card > summary {
+    .mobile-view details.finance-card > summary,
+    .mobile-view details#theTabCard > summary {
         cursor: pointer;
         list-style: revert; /* Show dropdown arrow */
+    }
+
+    .mobile-view #theTabCard {
+        order: 4;
+    }
+
+    .mobile-view #theTabCard .debt-content-wrapper {
+        grid-template-columns: 1fr;
+        gap: 20px;
     }
     .mobile-view details.finance-card .stack {
         overflow: hidden;
@@ -438,7 +460,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     .mobile-view #billTrackerCard { order: 2; margin-top: 0; }
     .mobile-view .add-bill-container { order: 3; }
     .mobile-view #pastBillsCard {
-        order: 4;
+        order: 5;
         margin-bottom: auto;
     }
     .mobile-view #pastBillsCard > summary {
@@ -759,8 +781,8 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
             </div>
         </div>
         <div class="dashboard-row" id="theTabRow" style="display: none;">
-            <div id="theTabCard" class="card glass">
-                <h2>The Tab</h2>
+            <details id="theTabCard" class="card glass">
+                <summary>The Tab</summary>
                 <div class="debt-content-wrapper">
                     <div id="debtList" class="debt-list">
                         </div>
@@ -775,7 +797,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
                         </form>
                     </div>
                 </div>
-            </div>
+            </details>
         </div>
     </div>
 
@@ -909,7 +931,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     <div class="section"><details><summary>Utility</summary><div class="content">
       <div class="stack">
         <label><input type="checkbox" id="enableMobileMode"> Use Mobile Layout on Small Screens</label>
-        <label><input type="checkbox" id="enableTheTab"> Enable "The Tab" (Desktop Only)</label>
+        <label><input type="checkbox" id="enableTheTab"> Enable "The Tab"</label>
       </div>
       <div class="hr"></div>
       <div class="stack"><label><input type="checkbox" id="enableClock"> Enable Clock</label><div id="clockOptionsWrapper" class="stack" style="display:none;"><label for="clockPosition">Position</label><select id="clockPosition"><option value="pos-top-left">Top Left</option><option value="pos-top-center">Top Center</option><option value="pos-top-right" selected>Top Right</option><option value="pos-bottom-left">Bottom Left</option><option value="pos-bottom-center">Bottom Center</option><option value="pos-bottom-right">Bottom Right</option></select><label for="clockDetail">Detail Level</label><select id="clockDetail"><option value="time">Time</option><option value="timeSec">Time w/ Seconds</option><option value="dateTime" selected>Date & Time</option></select></div></div><div class="hr"></div><div class="sub-section"><details><summary>Data Management</summary><div class="content"><div class="stack"><p style="font-size:12px;color:var(--muted);margin:4px 0 0;">Import or export your full application profile. This includes all bills, settings, and appearance customizations.</p><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;"><button id="importProfileBtn" class="ctrl-btn" style="width:100%; height:auto; padding: 10px;">Import Profile</button><button id="exportProfileBtn" class="ctrl-btn" style="width:100%; height:auto; padding: 10px;">Export Profile</button></div><div class="hr"></div><button id="resetProfileBtn" class="ctrl-btn" style="width: 100%; height: auto; padding: 10px; margin-top: 5px;">Reset to Factory Defaults</button></div></div></details></div></div></details></div>
@@ -1720,11 +1742,9 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     }
 
     function applyTheTab() {
+        theTabRow.style.display = enableTheTab.checked ? '' : 'none';
         if (enableTheTab.checked) {
-            theTabRow.style.display = 'grid';
             renderTheTab();
-        } else {
-            theTabRow.style.display = 'none';
         }
     }
 
@@ -2260,7 +2280,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     closeMenuNotch.addEventListener('click', () => menuPanel.style.display = 'none');
     calendarToggleBtn.addEventListener('click', () => { currentView = currentView === 'list' ? 'calendar' : 'list'; renderApp(true); });
     calendarView.addEventListener('click', handleCalendarNav);
-    [currentBalance, paycheckAmount, nextPayday, payFrequency, dontAutoDeduct].forEach(el => el.addEventListener('change', () => { saveData(); renderApp(true); }));
+    [currentBalance, paycheckAmount, nextPayday, payFrequency, dontAutoDeduct].forEach(el => el.addEventListener('input', () => { saveData(); updateSummary(); }));
     document.querySelectorAll('.menu-panel input, .menu-panel select').forEach(el => {
         const event = el.type === 'range' || el.type === 'color' ? 'input' : 'change';
         el.addEventListener(event, () => {
