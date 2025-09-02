@@ -48,7 +48,7 @@ body {
     border: 1px solid var(--glass-stroke); box-shadow: var(--glass-shadow);
     transform: translateZ(0); /* BUG FIX: Prevents rendering glitches on style change */
 }
-.app { width:100%; max-width:980px; display:flex; flex-direction:column; gap:20px; z-index: 10; height: calc(100vh - 40px); min-height: 700px; }
+.app { width:100%; max-width:980px; display:flex; flex-direction:column; gap:20px; z-index: 10; height: calc(100vh - 40px); min-height: 700px; position: relative; }
 .title-wrap { width: 100%; padding:10px 16px; border-radius:var(--border-radius); display: flex; justify-content: space-between; align-items: center; }
 .title-wrap h1 { margin:0; font-size:24px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
 .title-wrap h1 svg { width: 26px; height: 26px; fill: var(--accent); }
@@ -446,6 +446,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
 
     .mobile-view #theTabCard {
         order: 4;
+        text-align: left;
     }
     
     .mobile-view #theTabCard .debt-content-wrapper {
@@ -604,19 +605,13 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     }
     
     /* Make mobile UI opaque */
+    .mobile-view .title-wrap.glass,
     .mobile-view .summary-card.glass,
     .mobile-view #financeCard.glass,
     .mobile-view main.card.glass,
     .mobile-view #pastBillsCard.glass,
     .mobile-view .modal-content.glass,
     .mobile-view #calendarView.glass {
-        background: var(--card);
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-        --glass-alpha: 1; /* Force full alpha */
-    }
-
-    .mobile-view .title-wrap.glass {
       background: rgba(var(--glass-tint), 0.95);
        backdrop-filter: blur(8px) !important;
       -webkit-backdrop-filter: blur(8px) !important;
@@ -1712,16 +1707,9 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         const isMobile = enableMobileMode.checked && window.innerWidth <= 768;
         document.body.classList.toggle('mobile-view', isMobile);
 
-        if (isMobile) {
-            if (isAnimationRunning) {
-                isAnimationRunning = false;
-                ctxAmbiance.clearRect(0, 0, ambianceCanvas.width, ambianceCanvas.height);
-            }
-        } else {
-            if (!isAnimationRunning) {
-                isAnimationRunning = true;
-                requestAnimationFrame(mainLoop);
-            }
+        if (!isAnimationRunning) {
+            isAnimationRunning = true;
+            requestAnimationFrame(mainLoop);
         }
 
         const addButtonText = addBillBtnHeader.querySelector('.add-bill-text');
@@ -1729,7 +1717,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         const pastBillsCard = $('pastBillsCard'); 
 
         if (isMobile) {
-            financeCard.removeAttribute('open');
+            financeCard.setAttribute('open', '');
             pastBillsCard.removeAttribute('open');
             if (addButtonText) addButtonText.textContent = 'Bill / Expense';
         } else {
