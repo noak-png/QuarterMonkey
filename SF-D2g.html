@@ -141,7 +141,7 @@ details.finance-card > summary {
     padding: 16px;
     padding-bottom: 10px;
     list-style: none;
-    cursor: default;
+    cursor: pointer;
 }
 details.finance-card > summary::-webkit-details-marker { display: none; }
 #billTrackerCard > summary {
@@ -172,7 +172,7 @@ details.finance-card > summary::-webkit-details-marker { display: none; }
 .upcoming-item .countdown { color: var(--muted); font-size: 11px; }
 
 /* Add Bill Form & Bill List Table */
-details#billTrackerCard { flex: 1 1 auto; min-height: 0; }
+details#billTrackerCard { /* flex: 1 1 auto; min-height: 0; */ }
 .bill-table-wrapper { width: 100%; overflow-y: auto; flex-grow: 1; }
 .bill-table-wrapper.scrollable {
     max-height: 300px; /* Approx height of 4-5 rows */
@@ -582,6 +582,16 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         background: rgba(128,128,128,0.05);
     }
 
+    @media (min-width: 769px) {
+        #financeCard > summary {
+            pointer-events: none;
+            cursor: default;
+        }
+        #financeCard > summary::-webkit-details-marker {
+            display: none;
+        }
+    }
+
     .mobile-view #theTabCard {
         order: 4;
         text-align: left;
@@ -982,14 +992,16 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
 
     <details id="billTrackerCard" class="card glass" role="main">
       <summary>Upcoming Bills (Next 10 Days)</summary>
-      <div class="bill-table-wrapper">
-        <table class="bill-table" id="billList">
-            <thead id="billListHead">
-                <tr><th>Due Date</th><th>Bill Details</th><th>Notes</th><th>Amount</th><th style-align: right;>Actions</th></tr>
-            </thead>
-            <tbody id="billListBody"></tbody>
-        </table>
-        <div class="no-bills-message" id="noBillsMessage"><p>No upcoming bills. Add one to get started! 💸</p></div>
+      <div>
+          <div class="bill-table-wrapper">
+            <table class="bill-table" id="billList">
+                <thead id="billListHead">
+                    <tr><th>Due Date</th><th>Bill Details</th><th>Notes</th><th>Amount</th><th style-align: right;>Actions</th></tr>
+                </thead>
+                <tbody id="billListBody"></tbody>
+            </table>
+            <div class="no-bills-message" id="noBillsMessage"><p>No upcoming bills. Add one to get started! 💸</p></div>
+          </div>
       </div>
     </details>
 
@@ -1355,7 +1367,12 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         $('billDate').value = new Date().toISOString().split('T')[0];
         $('debtDate').value = new Date().toISOString().split('T')[0];
         applyAllAppearance(); renderApp(true);
-        
+        if (window.innerWidth > 768) {
+            $('financeCard').setAttribute('open', '');
+        }
+        if (!disableAutoOpenCurrentBills.checked) {
+            billTrackerCard.setAttribute('open', '');
+        }
     }
 
     // --- RENDERING ---
@@ -3507,7 +3524,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
 
             isAnimating = true;
 
-            if (details.open) {
+            if (details.hasAttribute('open')) {
                 // Closing animation
                 const height = content.scrollHeight;
                 const speed = parseFloat(slideSpeed.value) || 1000;
