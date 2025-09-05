@@ -1180,7 +1180,7 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     </main>
   </div>
 
-  <div id="editModal" class="modal-overlay"><div class="modal-content glass"><h2 id="editModalTitle">Edit Bill</h2><div class="modal-form"><label for="editBillName">Bill Name</label><input type="text" id="editBillName" class="full-width"><label for="editBillAmount">Total Amount</label><input type="number" step="0.01" id="editBillAmount" class="full-width"><label for="editBillDate">Due Date</label><input type="date" id="editBillDate" class="full-width"><label for="editBillCategory">Category</label><select id="editBillCategory" class="full-width"></select><label for="editBillFrequency">Frequency</label><select id="editBillFrequency" class="full-width"></select><div id="editCustomFrequencyWrapper" class="full-width" style="display: none;"><input type="number" id="editBillCustomFrequency" placeholder="Every X Days" style="width: 100%;"></div><label for="editBillNotes">Notes</label><textarea id="editBillNotes" class="full-width"></textarea><div id="editSplitBillInputs" class="full-width"><hr><label>Split Info</label><input type="text" id="editBillSplitName" placeholder="Split with (Name)"><input type="number" id="editBillSplitAmount" placeholder="Their Share ($)"></div><div class="modal-buttons"><button type="button" class="cancel-btn" id="closeModalBtn">Cancel</button><button type="button" class="save-btn" id="saveEditBtn">Save Changes</button></div></div></div></div>
+  <div id="editModal" class="modal-overlay"><div class="modal-content glass"><h2 id="editModalTitle">Edit Bill</h2><div class="modal-form"><label for="editBillName">Bill Name</label><input type="text" id="editBillName" class="full-width"><label for="editBillAmount">Total Amount</label><input type="number" step="0.01" id="editBillAmount" class="full-width"><div id="editYourShareWrapper" class="full-width" style="display: none; margin-bottom: 16px; padding: 8px; background: rgba(128,128,128,0.05); border-radius: 8px;"><label for="editYourShare" style="font-weight: 600; color: var(--accent);">Your Share (calculated)</label><input type="text" id="editYourShare" class="full-width" readonly style="background: transparent; border: 1px solid var(--accent); color: var(--accent); font-weight: 600;"><small style="color: var(--muted); font-size: 12px;">This is automatically calculated: Total Amount - Their Share</small></div><label for="editBillDate">Due Date</label><input type="date" id="editBillDate" class="full-width"><label for="editBillCategory">Category</label><select id="editBillCategory" class="full-width"></select><label for="editBillFrequency">Frequency</label><select id="editBillFrequency" class="full-width"></select><div id="editCustomFrequencyWrapper" class="full-width" style="display: none;"><input type="number" id="editBillCustomFrequency" placeholder="Every X Days" style="width: 100%;"></div><label for="editBillNotes">Notes</label><textarea id="editBillNotes" class="full-width"></textarea><div id="editSplitBillInputs" class="full-width"><hr><label>Split Info</label><input type="text" id="editBillSplitName" placeholder="Split with (Name)"><input type="number" id="editBillSplitAmount" placeholder="Their Share ($)"></div><div class="modal-buttons"><button type="button" class="cancel-btn" id="closeModalBtn">Cancel</button><button type="button" class="save-btn" id="saveEditBtn">Save Changes</button></div></div></div></div>
 
   <div id="dayBreakdownModal" class="modal-overlay">
     <div class="modal-content glass">
@@ -2010,9 +2010,41 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         editSplitBillInputs.style.display = 'block';
         $('editBillSplitName').value = bill.splitWithName || '';
         $('editBillSplitAmount').value = bill.splitWithAmount || '';
+        
+        // Show/update the "Your Share" field for split bills
+        updateEditYourShareDisplay();
+        
         editModal.classList.add('visible');
     }
     function closeEditModal() { editModal.classList.remove('visible'); }
+    
+    function updateEditYourShareDisplay() {
+        const totalAmount = parseFloat($('editBillAmount').value) || 0;
+        const splitName = $('editBillSplitName').value.trim();
+        const splitAmount = parseFloat($('editBillSplitAmount').value) || 0;
+        const yourShareWrapper = $('editYourShareWrapper');
+        const yourShareField = $('editYourShare');
+        
+        if (splitName && splitAmount > 0) {
+            // This is a split bill, show the "Your Share" field
+            yourShareWrapper.style.display = 'block';
+            const yourShare = totalAmount - splitAmount;
+            yourShareField.value = formatCurrency(yourShare);
+            
+            // Add warning styling if your share would be negative
+            if (yourShare < 0) {
+                yourShareField.style.color = 'var(--danger)';
+                yourShareField.style.borderColor = 'var(--danger)';
+            } else {
+                yourShareField.style.color = 'var(--accent)';
+                yourShareField.style.borderColor = 'var(--accent)';
+            }
+        } else {
+            // Not a split bill, hide the "Your Share" field
+            yourShareWrapper.style.display = 'none';
+        }
+    }
+    
     function handleSaveEdit() {
         const billId = Number(editModal.dataset.editingId);
         const bill = bills.find(b => b.id === billId);
@@ -2031,6 +2063,12 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         const splitName = $('editBillSplitName').value.trim();
         const splitAmount = parseFloat($('editBillSplitAmount').value) || 0;
         if (splitName && splitAmount > 0) {
+            // Validate split bill configuration
+            const validation = validateSplitBill(bill.amount, splitAmount);
+            if (!validation.valid) {
+                showModal({ title: 'Invalid Split', text: validation.message, buttons: [{ text: 'OK', value: 'ok', class: 'save-btn' }]});
+                return;
+            }
             bill.isSplit = true;
             bill.splitWithName = splitName;
             bill.splitWithAmount = splitAmount;
@@ -2042,6 +2080,23 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
         saveData();
         renderApp(true);
         closeEditModal();
+    }
+
+    // Add validation to prevent impossible split bill configurations
+    function validateSplitBill(totalAmount, splitAmount) {
+        if (splitAmount >= totalAmount && totalAmount > 0) {
+            return {
+                valid: false,
+                message: "The other person's share cannot be greater than or equal to the total amount."
+            };
+        }
+        if (splitAmount < 0) {
+            return {
+                valid: false,
+                message: "The other person's share cannot be negative."
+            };
+        }
+        return { valid: true };
     }
 
     function showDayBreakdown(date) {
@@ -3050,6 +3105,12 @@ tr.collapsing { overflow:hidden; height:0 !important; padding-top:0 !important; 
     pastBillsListBody.addEventListener('dblclick', handleListDoubleClick);
     saveEditBtn.addEventListener('click', handleSaveEdit);
     closeModalBtn.addEventListener('click', closeEditModal);
+    
+    // Add event listeners to update "Your Share" field in real-time
+    $('editBillAmount').addEventListener('input', updateEditYourShareDisplay);
+    $('editBillSplitAmount').addEventListener('input', updateEditYourShareDisplay);
+    $('editBillSplitName').addEventListener('input', updateEditYourShareDisplay);
+    
     $('closeDayBreakdownModalBtn').addEventListener('click', closeDayBreakdownModal);
     $('dayBreakdownModal').addEventListener('click', handleModalActionClick);
     darkToggle.addEventListener('click', handleToggleDarkMode);
